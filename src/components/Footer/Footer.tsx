@@ -2,7 +2,11 @@ import React from 'react';
 import * as FaIcons from 'react-icons/fa';
 import './Footer.css';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+    onOpenFavoriteModal: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenFavoriteModal }) => {
     return (
         <footer className="footer-container">
             <div className="footer-right">
@@ -10,7 +14,7 @@ export const Footer: React.FC = () => {
                     <FaIcons.FaUser className="footer-icon" />
                     ユーザー一覧
                 </button>
-                <button className="footer-button">
+                <button className="footer-button" onClick={onOpenFavoriteModal}>
                     <FaIcons.FaTasks className="footer-icon" />
                     お気に入り間接タスク設定
                 </button>

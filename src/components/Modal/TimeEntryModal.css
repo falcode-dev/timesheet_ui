@@ -61,11 +61,12 @@
     color: var(--main-color);
     font-size: 1.2rem;
     font-weight: bold;
+    margin: 0px;
 }
 
 /* ====== 本文 ====== */
 .modal-body {
-    padding: 20px;
+    padding: 10px 20px;
 }
 
 .modal-description {
