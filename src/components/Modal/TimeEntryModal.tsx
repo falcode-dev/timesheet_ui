@@ -13,25 +13,33 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     onClose,
     onSubmit,
 }) => {
-    const [fadeState, setFadeState] = useState<'fade-in' | 'fade-out' | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [comment, setComment] = useState('');
     const maxLength = 2000;
 
+    // 🧩 フェードアニメーションの制御
     useEffect(() => {
         if (isOpen) {
-            setFadeState('fade-in');
-        } else if (!isOpen && fadeState === 'fade-in') {
-            setFadeState('fade-out');
-            const timer = setTimeout(() => setFadeState(null), 300);
+            setIsMounted(true); // DOMマウント
+            const timer = setTimeout(() => {
+                setIsVisible(true); // 次のフレームでフェードイン
+            }, 10);
+            return () => clearTimeout(timer);
+        } else if (!isOpen && isMounted) {
+            setIsVisible(false); // フェードアウト開始
+            const timer = setTimeout(() => {
+                setIsMounted(false); // フェードアウト完了後にアンマウント
+            }, 300); // アニメーション時間に合わせる
             return () => clearTimeout(timer);
         }
-    }, [isOpen]);
+    }, [isOpen, isMounted]);
 
-    if (!isOpen && fadeState !== 'fade-out') return null;
+    if (!isMounted) return null;
 
     return (
-        <div className={`modal-overlay ${fadeState}`}>
-            <div className={`modal-content ${fadeState}`}>
+        <div className={`modal-overlay ${isVisible ? 'fade-in' : 'fade-out'}`}>
+            <div className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
                 {/* モーダルヘッダー */}
                 <div className="modal-header">
                     <h3 className="modal-title">新しいタイムエントリを作成</h3>
@@ -45,7 +53,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
 
                     {/* WO番号 */}
                     <label className="modal-label">WO番号</label>
-                    <div className="modal-select">
+                    <div className="modal-select full-width">
                         <input type="text" placeholder="WOを選択" readOnly />
                         <FaIcons.FaChevronDown className="icon" />
                     </div>
@@ -55,17 +63,17 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                         <div className="grid-left">
                             {/* 開始日 */}
                             <label className="modal-label">スケジュール開始日</label>
-                            <div className="date-row">
+                            <div className="datetime-row">
                                 <div className="date-input">
                                     <input type="text" placeholder="yyyy/mm/dd" />
                                     <FaIcons.FaRegCalendarAlt className="icon" />
                                 </div>
-                                <div className="time-select">
+                                <div className="time-input">
                                     <input type="text" placeholder="時間" />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
-                                <div className="minute-select">
+                                <div className="minute-input">
                                     <input type="text" placeholder="分" />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
@@ -73,35 +81,35 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
 
                             {/* 終了日 */}
                             <label className="modal-label">スケジュール終了日</label>
-                            <div className="date-row">
+                            <div className="datetime-row">
                                 <div className="date-input">
                                     <input type="text" placeholder="yyyy/mm/dd" />
                                     <FaIcons.FaRegCalendarAlt className="icon" />
                                 </div>
-                                <div className="time-select">
+                                <div className="time-input">
                                     <input type="text" placeholder="時間" />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
-                                <div className="minute-select">
+                                <div className="minute-input">
                                     <input type="text" placeholder="分" />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
 
-                            {/* EndUser */}
+                            {/* EndUser（アイコン一体化） */}
                             <label className="modal-label">EndUser</label>
-                            <div className="enduser-row">
+                            <div className="enduser-combined">
                                 <input type="text" placeholder="エンドユーザーを入力" />
-                                <div className="enduser-select">
-                                    <FaIcons.FaChevronDown />
-                                </div>
+                                <FaIcons.FaChevronDown className="enduser-icon" />
                             </div>
 
                             {/* リソース */}
                             <div className="resource-header">
                                 <label className="modal-label">リソース</label>
-                                <a href="#" className="resource-link">リソース選択</a>
+                                <a href="#" className="resource-link">
+                                    リソース選択
+                                </a>
                             </div>
                             <textarea placeholder="リソースの詳細を入力" rows={4}></textarea>
                         </div>
