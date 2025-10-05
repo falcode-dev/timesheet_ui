@@ -1,42 +1,17 @@
-/* .App {
-  text-align: center;
+:root {
+  --main-color: rgb(0, 137, 186);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* 画面全体レイアウト */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+  background-color: #f5f7fa;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-} */
-
 
 .app-container {
   display: flex;
@@ -44,43 +19,96 @@
   min-height: 100vh;
 }
 
-/* 全体のレイアウト */
+/* ヘッダー固定幅 */
+header {
+  flex-shrink: 0;
+}
+
+/* メイン全体 */
 .main-layout {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  background-color: #fff;
-  /* ← 少し明るいグレーで背景と差をつける */
-  padding: 16px;
-  /* ← 外側パディングで枠の余白を出す */
-  box-sizing: border-box;
-}
-
-/* コンテンツ（サイドバー＋カレンダー）全体を囲む枠 */
-.content-body {
-  display: flex;
-  flex: 1;
-  background-color: #fff;
-  /* border: 1px solid #ddd; */
-  /* border-radius: 8px; */
-  /* ← 丸角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-  /* ← 立体感 */
   overflow: hidden;
-  box-sizing: border-box;
 }
 
-/* サイドバー固定 */
+/* コンテンツ枠（白カード風） */
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ddd;
+  margin: 12px;
+  overflow: hidden;
+}
+
+/* コンテンツ本体：サイドバー＋カレンダー */
+.content-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  /* ← 重要: Flex 子要素が正しく高さを取るため */
+}
+
+/* サイドバー */
 .sidebar-container {
   width: 280px;
   flex-shrink: 0;
   border-right: 1px solid #ddd;
+  overflow-y: auto;
+  background-color: #fff;
 }
 
-/* カレンダー区域 */
+/* カレンダー領域 */
 .main-calendar {
   flex: 1;
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
   background-color: #fff;
-  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* フッター（ページ全体用） */
+footer {
+  flex-shrink: 0;
+}
+
+/* =====================
+   ✅ レスポンシブ対応
+   ===================== */
+@media (max-width: 1024px) {
+  .sidebar-container {
+    width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-body {
+    flex-direction: column;
+    /* サイドバーを上／下に */
+  }
+
+  .sidebar-container {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .main-calendar {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-wrapper {
+    margin: 8px;
+    border-radius: 6px;
+  }
+
+  .main-calendar {
+    min-height: 300px;
+  }
 }
