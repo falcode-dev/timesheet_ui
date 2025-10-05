@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import * as FaIcons from 'react-icons/fa';
 import './ContentHeader.css';
 
-export const ContentHeader: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'user' | 'task'>('user');
-    const [viewMode, setViewMode] = useState<'1日' | '3日' | '週'>('週');
+interface ContentHeaderProps {
+    viewMode: '1日' | '3日' | '週';
+    onViewChange: (mode: '1日' | '3日' | '週') => void;
+    onPrev: () => void;
+    onNext: () => void;
+    onToday: () => void;
+    currentDate: Date;
+}
 
-    const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+export const ContentHeader: React.FC<ContentHeaderProps> = ({
+    viewMode,
+    onViewChange,
+    onPrev,
+    onNext,
+    onToday,
+    currentDate,
+}) => {
+    const todayStr = currentDate.toISOString().split('T')[0].replace(/-/g, '/');
 
     return (
         <div className="content-header">
@@ -14,14 +27,14 @@ export const ContentHeader: React.FC = () => {
             <div className="content-left">
                 <div className="content-tabs">
                     <button
-                        className={`tab ${activeTab === 'user' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('user')}
+                        className={`tab ${viewMode === '週' ? 'active' : ''}`}
+                        onClick={() => onViewChange('週')}
                     >
                         ユーザー一覧
                     </button>
                     <button
-                        className={`tab ${activeTab === 'task' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('task')}
+                        className={`tab ${viewMode === '3日' ? 'active' : ''}`}
+                        onClick={() => onViewChange('3日')}
                     >
                         間接タスク
                     </button>
@@ -35,27 +48,30 @@ export const ContentHeader: React.FC = () => {
 
             {/* 右エリア */}
             <div className="content-right">
-                <button className="today-button">
+                <button className="today-button" onClick={onToday}>
                     <FaIcons.FaCalendarAlt className="icon" />
                     今日
                 </button>
 
-                {/* ← 修正：独立した矢印ボタン */}
-                <button className="arrow-button">{'<'}</button>
-
-                <button className="arrow-button">{'>'}</button>
+                <button className="arrow-button" onClick={onPrev}>
+                    {'<'}
+                </button>
 
                 <div className="date-display">
-                    {today}
+                    {todayStr}
                     <FaIcons.FaRegCalendarAlt className="date-icon" />
                 </div>
+
+                <button className="arrow-button" onClick={onNext}>
+                    {'>'}
+                </button>
 
                 <div className="view-tabs">
                     {['1日', '3日', '週'].map((v) => (
                         <button
                             key={v}
                             className={`view-tab ${viewMode === v ? 'active' : ''}`}
-                            onClick={() => setViewMode(v as any)}
+                            onClick={() => onViewChange(v as '1日' | '3日' | '週')}
                         >
                             {v}
                         </button>
