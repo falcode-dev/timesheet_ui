@@ -4,37 +4,38 @@ import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import jaLocale from '@fullcalendar/core/locales/ja';
 import './CalendarView.css';
 
-export const CalendarView: React.FC<{
+interface CalendarViewProps {
     viewMode: '1日' | '3日' | '週';
     currentDate: Date;
     onDateChange: (newDate: Date) => void;
-}> = ({ viewMode, currentDate }) => {
+    onDateClick?: (date: Date) => void; // ✅ カレンダークリック通知
+}
+
+export const CalendarView: React.FC<CalendarViewProps> = ({
+    viewMode,
+    currentDate,
+    onDateChange,
+    onDateClick,
+}) => {
     const calendarRef = useRef<FullCalendar>(null);
     const [events, setEvents] = useState<any[]>([]);
 
+    /** ✅ 範囲選択 or クリックで App に通知 */
     const handleDateSelect = (selectInfo: DateSelectArg) => {
-        const title = prompt('タイムエントリ名を入力してください:');
-        if (title) {
-            setEvents((prev) => [
-                ...prev,
-                {
-                    id: String(Date.now()),
-                    title,
-                    start: selectInfo.startStr,
-                    end: selectInfo.endStr,
-                },
-            ]);
-        }
+        onDateClick?.(selectInfo.start); // ✅ モーダルは App 側で開く
     };
 
+    /** ✅ イベントクリックで削除確認 */
     const handleEventClick = (clickInfo: EventClickArg) => {
         if (window.confirm(`「${clickInfo.event.title}」を削除しますか？`)) {
             setEvents((prev) => prev.filter((e) => e.id !== clickInfo.event.id));
         }
     };
 
+    /** ✅ ビュー切り替え処理 */
     useEffect(() => {
         const api = calendarRef.current?.getApi();
         if (!api) return;
@@ -46,7 +47,7 @@ export const CalendarView: React.FC<{
                 api.changeView('timeGridDay');
                 break;
             case '3日':
-                api.changeView('timeGridThreeDay'); // ✅ durationはここで定義したviewを使用
+                api.changeView('timeGridThreeDay');
                 break;
             case '週':
             default:
@@ -62,7 +63,8 @@ export const CalendarView: React.FC<{
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
                 selectable={true}
-                select={handleDateSelect}
+                selectMirror={true}
+                select={handleDateSelect} // ✅ 通知のみ
                 eventClick={handleEventClick}
                 events={events}
                 headerToolbar={false}
@@ -72,8 +74,7 @@ export const CalendarView: React.FC<{
                 nowIndicator={true}
                 slotMinTime="06:00:00"
                 slotMaxTime="22:00:00"
-                locale="ja"
-                /* ✅ ここで3日ビューを定義 */
+                locale={jaLocale}
                 views={{
                     timeGridThreeDay: {
                         type: 'timeGrid',

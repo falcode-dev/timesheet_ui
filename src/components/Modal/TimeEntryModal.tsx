@@ -6,31 +6,64 @@ interface TimeEntryModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: any) => void;
+    selectedDateTime?: Date | null; // ✅ カレンダークリックで渡ってくる日時
 }
 
 export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     isOpen,
     onClose,
     onSubmit,
+    selectedDateTime,
 }) => {
     const [isMounted, setIsMounted] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [comment, setComment] = useState('');
     const maxLength = 2000;
 
-    // 🧩 フェードアニメーションの制御
+    const [startDate, setStartDate] = useState('');
+    const [startHour, setStartHour] = useState('');
+    const [startMinute, setStartMinute] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [endHour, setEndHour] = useState('');
+    const [endMinute, setEndMinute] = useState('');
+
+    // 🧩 日付クリックで自動反映
+    useEffect(() => {
+        if (selectedDateTime) {
+            const date = selectedDateTime;
+            const startYMD = date.toISOString().split('T')[0].replace(/-/g, '/');
+            const startH = date.getHours();
+            const startM = date.getMinutes();
+
+            const end = new Date(date.getTime() + 60 * 60 * 1000); // +1時間
+            const endYMD = end.toISOString().split('T')[0].replace(/-/g, '/');
+
+            setStartDate(startYMD);
+            setStartHour(startH.toString().padStart(2, '0'));
+            setStartMinute(startM.toString().padStart(2, '0'));
+            setEndDate(endYMD);
+            setEndHour(end.getHours().toString().padStart(2, '0'));
+            setEndMinute(end.getMinutes().toString().padStart(2, '0'));
+        } else {
+            // 新規作成ボタンなどで開いた場合、空欄にリセット
+            setStartDate('');
+            setStartHour('');
+            setStartMinute('');
+            setEndDate('');
+            setEndHour('');
+            setEndMinute('');
+        }
+    }, [selectedDateTime]);
+
+    // 🧩 フェードアニメーション制御
     useEffect(() => {
         if (isOpen) {
-            setIsMounted(true); // DOMマウント
-            const timer = setTimeout(() => {
-                setIsVisible(true); // 次のフレームでフェードイン
-            }, 10);
+            setIsMounted(true);
+            const timer = setTimeout(() => setIsVisible(true), 10);
             return () => clearTimeout(timer);
         } else if (!isOpen && isMounted) {
-            setIsVisible(false); // フェードアウト開始
-            const timer = setTimeout(() => {
-                setIsMounted(false); // フェードアウト完了後にアンマウント
-            }, 300); // アニメーション時間に合わせる
+            setIsVisible(false);
+            const timer = setTimeout(() => setIsMounted(false), 300);
             return () => clearTimeout(timer);
         }
     }, [isOpen, isMounted]);
@@ -65,16 +98,16 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <label className="modal-label">スケジュール開始日</label>
                             <div className="datetime-row">
                                 <div className="date-input">
-                                    <input type="text" placeholder="yyyy/mm/dd" />
+                                    <input type="text" value={startDate} readOnly />
                                     <FaIcons.FaRegCalendarAlt className="icon" />
                                 </div>
                                 <div className="time-input">
-                                    <input type="text" placeholder="時間" />
+                                    <input type="text" value={startHour} readOnly />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
                                 <div className="minute-input">
-                                    <input type="text" placeholder="分" />
+                                    <input type="text" value={startMinute} readOnly />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
@@ -83,21 +116,21 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <label className="modal-label">スケジュール終了日</label>
                             <div className="datetime-row">
                                 <div className="date-input">
-                                    <input type="text" placeholder="yyyy/mm/dd" />
+                                    <input type="text" value={endDate} readOnly />
                                     <FaIcons.FaRegCalendarAlt className="icon" />
                                 </div>
                                 <div className="time-input">
-                                    <input type="text" placeholder="時間" />
+                                    <input type="text" value={endHour} readOnly />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
                                 <div className="minute-input">
-                                    <input type="text" placeholder="分" />
+                                    <input type="text" value={endMinute} readOnly />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
 
-                            {/* EndUser（アイコン一体化） */}
+                            {/* EndUser */}
                             <label className="modal-label">EndUser</label>
                             <div className="enduser-combined">
                                 <input type="text" placeholder="エンドユーザーを入力" />
@@ -165,7 +198,20 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                         <button className="btn-cancel" onClick={onClose}>
                             キャンセル
                         </button>
-                        <button className="btn-create" onClick={() => onSubmit({ comment })}>
+                        <button
+                            className="btn-create"
+                            onClick={() =>
+                                onSubmit({
+                                    startDate,
+                                    startHour,
+                                    startMinute,
+                                    endDate,
+                                    endHour,
+                                    endMinute,
+                                    comment,
+                                })
+                            }
+                        >
                             作成
                         </button>
                     </div>
