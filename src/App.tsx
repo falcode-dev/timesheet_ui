@@ -9,22 +9,24 @@ function App() {
     <div className="app-container">
       <Header />
 
-      {/* ← コンテンツ全体 */}
       <main className="main-layout">
-        {/* 上部にContentHeader */}
-        <ContentHeader />
+        {/* コンテンツ全体の白枠 */}
+        <div className="content-wrapper">
+          <ContentHeader />
 
-        {/* サイドバー + カレンダー */}
-        <div className="content-body">
-          <Sidebar />
-          <div className="main-calendar">
-            {/* カレンダー領域（後で本実装） */}
-            <p>カレンダー表示予定</p>
+          <div className="content-body">
+            <Sidebar />
+            <div className="main-calendar">
+              {/* カレンダー本体 */}
+              <p>カレンダー表示予定</p>
+            </div>
           </div>
+
+          <Footer />
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

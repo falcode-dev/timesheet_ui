@@ -43,12 +43,12 @@ export const ContentHeader: React.FC = () => {
                 {/* ← 修正：独立した矢印ボタン */}
                 <button className="arrow-button">{'<'}</button>
 
+                <button className="arrow-button">{'>'}</button>
+
                 <div className="date-display">
                     {today}
                     <FaIcons.FaRegCalendarAlt className="date-icon" />
                 </div>
-
-                <button className="arrow-button">{'>'}</button>
 
                 <div className="view-tabs">
                     {['1日', '3日', '週'].map((v) => (
