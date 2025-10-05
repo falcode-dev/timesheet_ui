@@ -1,0 +1,107 @@
+:root {
+    --main-color: rgb(0, 137, 186);
+}
+
+.sidebar-container {
+    width: 280px;
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+    padding: 16px;
+    box-sizing: border-box;
+    /* ← これも重要 */
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sidebar-title {
+    color: var(--main-color);
+    margin-bottom: 8px;
+}
+
+.sidebar-radios label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 12px;
+    color: var(--main-color);
+}
+
+.sidebar-radios input[type="radio"] {
+    accent-color: var(--main-color);
+    margin-right: 4px;
+}
+
+.sidebar-search {
+    width: 100%;
+    box-sizing: border-box;
+    /* ← はみ出し防止 */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 8px;
+    color: #555;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+
+.sidebar-self {
+    color: var(--main-color);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-self input[type="checkbox"] {
+    accent-color: var(--main-color);
+    margin-right: 4px;
+}
+
+.sidebar-self-name {
+    margin-left: 20px;
+}
+
+.sidebar-divider {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+.sidebar-icon {
+    color: var(--main-color);
+}
+
+.sidebar-results label {
+    display: flex;
+    align-items: center;
+    color: var(--main-color);
+    gap: 6px;
+    padding: 4px 0;
+}
+
+.sidebar-results input[type="checkbox"] {
+    accent-color: var(--main-color);
+}
+
+.sidebar-favorites {
+    border-top: 1px solid #ddd;
+    padding-top: 8px;
+}
+
+.sidebar-fav-header {
+    display: flex;
+    align-items: center;
+    color: var(--main-color);
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.sidebar-icon-star {
+    color: var(--main-color);
+}
+
+.sidebar-fav-item {
+    color: var(--main-color);
+    padding: 2px 0;
+}

@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +35,42 @@
   to {
     transform: rotate(360deg);
   }
+} */
+
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 全体 */
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  /* ← 上からヘッダー・本文構成 */
+  flex: 1;
+  background-color: #f9f9f9;
+}
+
+/* サイドバー＋カレンダーの横並び領域 */
+.content-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* サイドバー固定 */
+.sidebar-container {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* カレンダー区域 */
+.main-calendar {
+  flex: 1;
+  padding: 16px;
+  background-color: #fff;
+  border-left: 1px solid #ddd;
+  box-sizing: border-box;
 }
