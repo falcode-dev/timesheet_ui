@@ -4,15 +4,19 @@ import './Footer.css';
 
 interface FooterProps {
     onOpenFavoriteModal: () => void;
+    onOpenUserListModal: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenFavoriteModal }) => {
+export const Footer: React.FC<FooterProps> = ({
+    onOpenFavoriteModal,
+    onOpenUserListModal,
+}) => {
     return (
         <footer className="footer-container">
             <div className="footer-right">
-                <button className="footer-button">
+                <button className="footer-button" onClick={onOpenUserListModal}>
                     <FaIcons.FaUser className="footer-icon" />
-                    ユーザー一覧
+                    ユーザー一覧設定
                 </button>
                 <button className="footer-button" onClick={onOpenFavoriteModal}>
                     <FaIcons.FaTasks className="footer-icon" />

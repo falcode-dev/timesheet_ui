@@ -6,7 +6,8 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { ContentHeader } from './components/ContentHeader/ContentHeader';
 import { CalendarView } from './components/Calendar/CalendarView';
 import { TimeEntryModal } from './components/Modal/TimeEntryModal';
-import { FavoriteTaskModal } from './components/Modal/FavoriteTaskModal'; // ✅ 追加
+import { FavoriteTaskModal } from './components/Modal/FavoriteTaskModal';
+import { UserListModal } from './components/Modal/UserListModal'; // ✅ 追加
 
 function App() {
   const [viewMode, setViewMode] = useState<'1日' | '3日' | '週'>('週');
@@ -14,9 +15,11 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
 
-  // ✅ 「お気に入り間接タスク設定」モーダルの状態管理
+  // ✅ モーダル管理
   const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
+  const [isUserListModalOpen, setIsUserListModalOpen] = useState(false);
 
+  // ========= カレンダー制御 ========= //
   const handlePrev = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() - (viewMode === '週' ? 7 : viewMode === '3日' ? 3 : 1));
@@ -31,7 +34,7 @@ function App() {
 
   const handleToday = () => setCurrentDate(new Date());
 
-  // ✅ カレンダークリックでモーダルを開く
+  // ========= タイムエントリモーダル ========= //
   const handleDateClick = (date: Date) => {
     setSelectedDateTime(date);
     setIsModalOpen(true);
@@ -42,10 +45,16 @@ function App() {
     setIsModalOpen(false);
   };
 
-  // ✅ お気に入り間接タスク保存処理
+  // ========= お気に入り間接タスクモーダル ========= //
   const handleFavoriteSave = (tasks: string[]) => {
     console.log('お気に入り間接タスク:', tasks);
     setIsFavoriteModalOpen(false);
+  };
+
+  // ========= ユーザー一覧設定モーダル ========= //
+  const handleUserListSave = (users: string[]) => {
+    console.log('ユーザー一覧設定:', users);
+    setIsUserListModalOpen(false);
   };
 
   return (
@@ -70,13 +79,16 @@ function App() {
                 viewMode={viewMode}
                 currentDate={currentDate}
                 onDateChange={setCurrentDate}
-                onDateClick={handleDateClick} // ✅ カレンダークリックイベント
+                onDateClick={handleDateClick}
               />
             </div>
           </div>
 
           {/* ✅ Footerにモーダル開閉関数を渡す */}
-          <Footer onOpenFavoriteModal={() => setIsFavoriteModalOpen(true)} />
+          <Footer
+            onOpenFavoriteModal={() => setIsFavoriteModalOpen(true)}
+            onOpenUserListModal={() => setIsUserListModalOpen(true)}
+          />
         </div>
       </main>
 
@@ -85,7 +97,7 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleModalSubmit}
-        selectedDateTime={selectedDateTime} // 日時を渡す
+        selectedDateTime={selectedDateTime}
       />
 
       {/* ✅ お気に入り間接タスク設定モーダル */}
@@ -93,6 +105,13 @@ function App() {
         isOpen={isFavoriteModalOpen}
         onClose={() => setIsFavoriteModalOpen(false)}
         onSave={handleFavoriteSave}
+      />
+
+      {/* ✅ ユーザー一覧設定モーダル */}
+      <UserListModal
+        isOpen={isUserListModalOpen}
+        onClose={() => setIsUserListModalOpen(false)}
+        onSave={handleUserListSave}
       />
     </div>
   );
