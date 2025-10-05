@@ -1,5 +1,9 @@
 :root {
     --main-color: rgb(0, 137, 186);
+    --border-color: #ccc;
+    --input-radius: 4px;
+    --input-padding: 8px 36px 8px 10px;
+    --input-font-size: 0.9rem;
 }
 
 /* ====== オーバーレイ（背景） ====== */
@@ -23,6 +27,7 @@
     opacity: 0;
 }
 
+/* ====== モーダル本体 ====== */
 .modal-content {
     background: #fff;
     border-radius: 10px;
@@ -46,29 +51,7 @@
     opacity: 0;
 }
 
-/* EndUser一体化 */
-.enduser-combined {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.enduser-combined input {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px 36px 8px 10px;
-    font-weight: bold;
-}
-
-.enduser-icon {
-    position: absolute;
-    right: 10px;
-    color: var(--main-color);
-}
-
-
-/* ヘッダー */
+/* ====== ヘッダー ====== */
 .modal-header {
     padding: 16px;
     border-bottom: 1px solid #ddd;
@@ -80,7 +63,7 @@
     font-weight: bold;
 }
 
-/* 本文 */
+/* ====== 本文 ====== */
 .modal-body {
     padding: 20px;
 }
@@ -91,7 +74,7 @@
     margin-bottom: 12px;
 }
 
-/* ラベル */
+/* ====== ラベル ====== */
 .modal-label {
     display: block;
     font-weight: bold;
@@ -100,7 +83,42 @@
     margin-bottom: 6px;
 }
 
-/* ====== 共通入力 ====== */
+/* ====== 共通入力デザイン（input・textarea・select統一） ====== */
+.form-control,
+.modal-select input,
+.date-input input,
+.time-input input,
+.minute-input input,
+.enduser-combined input,
+textarea {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: var(--input-radius);
+    padding: var(--input-padding);
+    font-size: var(--input-font-size);
+    font-weight: bold;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.modal-select input:focus,
+.date-input input:focus,
+.time-input input:focus,
+.minute-input input:focus,
+.enduser-combined input:focus,
+textarea:focus {
+    border-color: var(--main-color);
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 137, 186, 0.3);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ====== 共通選択入力 ====== */
 .modal-select {
     position: relative;
     display: inline-flex;
@@ -108,23 +126,14 @@
     width: 100%;
 }
 
-.modal-select.full-width {
-    width: 100%;
-}
-
-.modal-select input {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px 36px 8px 10px;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
 .modal-select .icon {
     position: absolute;
     right: 10px;
     color: var(--main-color);
+}
+
+.modal-select.full-width {
+    width: 100%;
 }
 
 /* ====== 日付・時間 ====== */
@@ -143,16 +152,6 @@
     flex: 1;
 }
 
-.date-input input,
-.time-input input,
-.minute-input input {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px 28px 8px 8px;
-    font-weight: bold;
-}
-
 .date-input .icon,
 .time-input .icon,
 .minute-input .icon {
@@ -166,14 +165,6 @@
     display: flex;
     align-items: center;
     position: relative;
-}
-
-.enduser-combined input {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px 36px 8px 10px;
-    font-weight: bold;
 }
 
 .enduser-icon {
@@ -204,16 +195,6 @@
     text-decoration: underline;
 }
 
-textarea {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    resize: vertical;
-}
-
 .char-count {
     text-align: right;
     font-size: 0.8rem;
@@ -221,7 +202,7 @@ textarea {
     margin-top: 4px;
 }
 
-/* フッター */
+/* ====== フッター ====== */
 .modal-footer {
     border-top: 1px solid #ddd;
     padding: 12px 16px;
@@ -268,5 +249,6 @@ textarea {
     .datetime-row {
         flex-direction: column;
         align-items: flex-start;
+        gap: 8px;
     }
 }
