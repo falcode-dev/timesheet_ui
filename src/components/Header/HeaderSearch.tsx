@@ -1,4 +1,5 @@
 import React from 'react';
+import * as FaIcons from 'react-icons/fa';
 import './Header.css';
 
 export const HeaderSearch: React.FC = () => {
@@ -9,7 +10,7 @@ export const HeaderSearch: React.FC = () => {
                 placeholder="対象WOを選択"
                 className="header-input"
             />
-            <span className="header-icon">▾</span>
+            <FaIcons.FaChevronDown className="header-icon" />
         </div>
     );
 };
