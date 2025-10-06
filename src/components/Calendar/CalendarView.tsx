@@ -11,7 +11,7 @@ interface CalendarViewProps {
     viewMode: '1日' | '3日' | '週';
     currentDate: Date;
     onDateChange: (newDate: Date) => void;
-    onDateClick?: (date: Date) => void; // ✅ カレンダークリック通知
+    onDateClick?: (date: Date) => void;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -23,23 +23,22 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const calendarRef = useRef<FullCalendar>(null);
     const [events, setEvents] = useState<any[]>([]);
 
-    /** ✅ 範囲選択 or クリックで App に通知 */
+    /** ✅ 日付クリック通知 */
     const handleDateSelect = (selectInfo: DateSelectArg) => {
-        onDateClick?.(selectInfo.start); // ✅ モーダルは App 側で開く
+        onDateClick?.(selectInfo.start);
     };
 
-    /** ✅ イベントクリックで削除確認 */
+    /** ✅ イベント削除 */
     const handleEventClick = (clickInfo: EventClickArg) => {
         if (window.confirm(`「${clickInfo.event.title}」を削除しますか？`)) {
             setEvents((prev) => prev.filter((e) => e.id !== clickInfo.event.id));
         }
     };
 
-    /** ✅ ビュー切り替え処理 */
+    /** ✅ ビュー切り替え */
     useEffect(() => {
         const api = calendarRef.current?.getApi();
         if (!api) return;
-
         api.gotoDate(currentDate);
 
         switch (viewMode) {
@@ -49,12 +48,25 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             case '3日':
                 api.changeView('timeGridThreeDay');
                 break;
-            case '週':
             default:
                 api.changeView('timeGridWeek');
                 break;
         }
     }, [viewMode, currentDate]);
+
+    /** ✅ ResizeObserverで安全に再描画 */
+    useEffect(() => {
+        const el = document.querySelector('.calendar-wrapper');
+        if (!el) return;
+
+        const observer = new ResizeObserver(() => {
+            const api = calendarRef.current?.getApi();
+            if (api) api.updateSize();
+        });
+        observer.observe(el);
+
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <div className="calendar-wrapper">
@@ -62,16 +74,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
-                selectable={true}
-                selectMirror={true}
-                select={handleDateSelect} // ✅ 通知のみ
+                selectable
+                selectMirror
+                select={handleDateSelect}
                 eventClick={handleEventClick}
                 events={events}
                 headerToolbar={false}
                 allDaySlot={false}
                 slotDuration="00:30:00"
                 height="100%"
-                nowIndicator={true}
+                nowIndicator
                 slotMinTime="06:00:00"
                 slotMaxTime="22:00:00"
                 locale={jaLocale}

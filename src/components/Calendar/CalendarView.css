@@ -1,41 +1,158 @@
-.calendar-wrapper {
-    width: 100%;
-    height: 100%;
-    padding: 8px;
-    box-sizing: border-box;
+:root {
+    --main-color: rgb(0, 137, 186);
 }
 
+/* ===== カレンダー全体 ===== */
+.calendar-wrapper {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    overflow: hidden;
+    /* ← PC時は固定 */
+}
+
+/* FullCalendar 基本設定 */
 .fc {
     font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
     font-size: 0.9rem;
+    background-color: #fff;
 }
 
-/* タイトル・線などの色調整 */
+/* 曜日ヘッダー */
 .fc .fc-col-header-cell-cushion {
-    color: rgb(0, 137, 186);
+    color: var(--main-color);
     font-weight: bold;
 }
 
+/* イベント */
 .fc .fc-event {
-    background-color: rgb(0, 137, 186);
+    background-color: var(--main-color);
     border: none;
     border-radius: 4px;
     font-weight: bold;
     padding: 2px 4px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* 日付の数字 */
 .fc .fc-daygrid-day-number {
-    color: rgb(0, 137, 186);
+    color: var(--main-color);
     font-weight: bold;
 }
 
-/* 時間軸の線を薄く */
+/* 時間軸の線 */
 .fc .fc-timegrid-slot {
     border-color: #eee;
 }
 
+/* 全体枠 */
 .fc .fc-scrollgrid {
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* タイトル */
+.fc-toolbar-title {
+    color: var(--main-color);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* ボタン */
+.fc .fc-toolbar-chunk button {
+    background-color: #fff;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.2s;
+    padding: 4px 8px;
+}
+
+.fc .fc-toolbar-chunk button:hover {
+    background-color: var(--main-color);
+    color: #fff;
+}
+
+/* =====================
+   ✅ レスポンシブ対応
+   ===================== */
+
+/* --- タブレット --- */
+@media (max-width: 1024px) {
+    .fc {
+        font-size: 0.85rem;
+    }
+
+    .fc-toolbar-title {
+        font-size: 1rem;
+    }
+}
+
+/* --- スマホ --- */
+@media (max-width: 768px) {
+
+    /* ✅ 横スクロール許可（内部スクロール） */
+    .calendar-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ✅ FullCalendar 内部に横幅を指定してスワイプ可能に */
+    .calendar-wrapper .fc {
+        min-width: 700px;
+        /* ← 横スクロール発生ポイント */
+    }
+
+    /* ✅ 時間軸が潰れないように固定 */
+    .fc-timegrid-axis {
+        min-width: 45px;
+        background-color: #fff;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+    }
+
+    .fc {
+        font-size: 0.8rem;
+    }
+
+    .fc .fc-event {
+        font-size: 0.75rem;
+        padding: 1px 3px;
+    }
+
+    .fc .fc-daygrid-day-frame {
+        min-height: 60px;
+    }
+}
+
+/* --- 小型スマホ --- */
+@media (max-width: 480px) {
+    .calendar-wrapper .fc {
+        min-width: 600px;
+    }
+
+    .fc {
+        font-size: 0.75rem;
+    }
+
+    .fc-toolbar-title {
+        font-size: 0.9rem;
+    }
+
+    .fc .fc-event {
+        font-size: 0.7rem;
+        padding: 1px 2px;
+    }
+
+    .fc .fc-daygrid-day-frame {
+        min-height: 50px;
+    }
 }

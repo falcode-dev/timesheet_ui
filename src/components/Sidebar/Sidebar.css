@@ -2,27 +2,32 @@
     --main-color: rgb(0, 137, 186);
 }
 
+/* =====================
+   サイドバー（PC）
+   ===================== */
 .sidebar-container {
     width: 280px;
     background-color: #fff;
     border-right: 1px solid #ddd;
     padding: 16px;
     box-sizing: border-box;
-    /* ← これも重要 */
+    /* ← はみ出し防止 */
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
     font-weight: bold;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    transition: all 0.3s ease;
 }
 
+/* タイトル */
 .sidebar-title {
     color: var(--main-color);
-    margin-bottom: 8px;
+    margin: 0 0 8px 0;
     font-size: 16px;
-    margin: 0;
 }
 
+/* ラジオボタン群 */
 .sidebar-radios label {
     display: inline-flex;
     align-items: center;
@@ -35,6 +40,7 @@
     margin-right: 4px;
 }
 
+/* 検索欄 */
 .sidebar-search {
     width: 100%;
     box-sizing: border-box;
@@ -47,7 +53,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-
+/* 自分セクション */
 .sidebar-self {
     color: var(--main-color);
     display: flex;
@@ -64,16 +70,19 @@
     margin-left: 20px;
 }
 
+/* 区切り線 */
 .sidebar-divider {
     display: flex;
     justify-content: center;
     margin: 8px 0;
 }
 
+/* アイコン */
 .sidebar-icon {
     color: var(--main-color);
 }
 
+/* 検索結果 */
 .sidebar-results label {
     display: flex;
     align-items: center;
@@ -86,6 +95,7 @@
     accent-color: var(--main-color);
 }
 
+/* お気に入り */
 .sidebar-favorites {
     border-top: 1px solid #ddd;
     padding-top: 8px;
@@ -106,4 +116,70 @@
 .sidebar-fav-item {
     color: var(--main-color);
     padding: 2px 0;
+}
+
+/* =====================
+   ✅ レスポンシブ対応
+   ===================== */
+
+/* タブレット（中画面） */
+@media (max-width: 1024px) {
+    .sidebar-container {
+        width: 240px;
+    }
+}
+
+/* スマホ（768px以下） */
+@media (max-width: 768px) {
+    .sidebar-container {
+        width: 100%;
+        /* ✅ 横いっぱいに展開 */
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        /* 下向きの影で上部に自然な独立感 */
+        padding: 12px 16px;
+        gap: 12px;
+        flex-direction: column;
+        z-index: 2;
+        position: relative;
+    }
+
+    .sidebar-title {
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+
+    .sidebar-radios label {
+        margin-right: 8px;
+        font-size: 0.95rem;
+    }
+
+    .sidebar-search {
+        padding: 5px 8px;
+    }
+
+    .sidebar-favorites {
+        padding-top: 6px;
+    }
+}
+
+/* スマホ小画面（480px以下） */
+@media (max-width: 480px) {
+    .sidebar-container {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 10px 12px;
+        gap: 10px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-search {
+        font-size: 0.9rem;
+        padding: 5px 8px;
+    }
+
+    .sidebar-title {
+        font-size: 14px;
+    }
 }
