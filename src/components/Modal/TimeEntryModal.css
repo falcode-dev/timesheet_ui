@@ -161,6 +161,48 @@ textarea {
     color: var(--main-color);
 }
 
+.date-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.date-input input[type="date"] {
+    width: 100%;
+    padding-right: 30px;
+    /* アイコンスペース */
+}
+
+.date-input .icon {
+    position: absolute;
+    right: 8px;
+    color: var(--main-color);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: opacity 0.2s ease;
+}
+
+.date-input .icon:hover {
+    opacity: 0.7;
+}
+
+/* Chrome, Safari, Edge 用 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+/* Firefox 用（現状、表示されないが安全のため） */
+input[type="date"]::-moz-calendar-picker-indicator {
+    display: none;
+}
+
+/* Edge 旧版（IEモード）対策 */
+input[type="date"]::-ms-clear,
+input[type="date"]::-ms-expand {
+    display: none;
+}
+
 /* ====== EndUser（結合） ====== */
 .enduser-combined {
     display: flex;

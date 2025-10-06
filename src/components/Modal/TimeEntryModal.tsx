@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import './TimeEntryModal.css';
 
@@ -26,6 +26,10 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     const [endDate, setEndDate] = useState('');
     const [endHour, setEndHour] = useState('');
     const [endMinute, setEndMinute] = useState('');
+
+    // 🔹 date input 参照を保持（アイコンクリックで showPicker() するため）
+    const startDateRef = useRef<HTMLInputElement>(null);
+    const endDateRef = useRef<HTMLInputElement>(null);
 
     // ✅ 初期表示：カレンダー範囲を反映
     useEffect(() => {
@@ -95,11 +99,15 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <div className="datetime-row">
                                 <div className="date-input">
                                     <input
+                                        ref={startDateRef}
                                         type="date"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
                                     />
-                                    <FaIcons.FaRegCalendarAlt className="icon" />
+                                    <FaIcons.FaRegCalendarAlt
+                                        className="icon clickable"
+                                        onClick={() => startDateRef.current?.showPicker?.()}
+                                    />
                                 </div>
                                 <div className="time-input">
                                     <input
@@ -109,7 +117,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                                         value={startHour}
                                         onChange={(e) => setStartHour(e.target.value)}
                                     />
-                                    <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
                                 <div className="minute-input">
@@ -120,7 +127,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                                         value={startMinute}
                                         onChange={(e) => setStartMinute(e.target.value)}
                                     />
-                                    <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
 
@@ -129,11 +135,15 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <div className="datetime-row">
                                 <div className="date-input">
                                     <input
+                                        ref={endDateRef}
                                         type="date"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
                                     />
-                                    <FaIcons.FaRegCalendarAlt className="icon" />
+                                    <FaIcons.FaRegCalendarAlt
+                                        className="icon clickable"
+                                        onClick={() => endDateRef.current?.showPicker?.()}
+                                    />
                                 </div>
                                 <div className="time-input">
                                     <input
@@ -143,7 +153,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                                         value={endHour}
                                         onChange={(e) => setEndHour(e.target.value)}
                                     />
-                                    <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
                                 <div className="minute-input">
@@ -154,7 +163,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                                         value={endMinute}
                                         onChange={(e) => setEndMinute(e.target.value)}
                                     />
-                                    <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
 
@@ -163,6 +171,13 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <div className="enduser-combined">
                                 <input type="text" placeholder="エンドユーザーを入力" />
                                 <FaIcons.FaChevronDown className="enduser-icon" />
+                            </div>
+
+                            {/* Location */}
+                            <label className="modal-label">Location</label>
+                            <div className="modal-select full-width">
+                                <input type="text" placeholder="場所を選択" readOnly />
+                                <FaIcons.FaChevronDown className="icon" />
                             </div>
 
                             {/* リソース */}
