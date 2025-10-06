@@ -130,28 +130,29 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                                 <span className="count">{searchResults.length}件</span>
                             </div>
 
-                            {/* ✅ 枠に入れるチェックエリア */}
-                            <div className="list-checkbox-area">
-                                <div className="list-subheader">
-                                    <input type="checkbox" />
-                                    <span className="subcat-title">サブカテゴリ名</span>
+                            <div className="list-subheader">
+                                <div className="list-subheader-left">
+                                    <FaIcons.FaCheckSquare className="check-icon" />
+                                    <FaIcons.FaChevronDown className="list-subheader-right" />
+                                    <span className="label-text">サブカテゴリ</span>
+                                    <FaIcons.FaTasks className="task-icon" />
                                 </div>
+                            </div>
 
-                                <div className="list-box">
-                                    {searchResults.map((task) => (
-                                        <label key={task} className="list-item-2line">
-                                            <input
-                                                type="checkbox"
-                                                checked={checkedResults.includes(task)}
-                                                onChange={() => toggleCheck(task)}
-                                            />
-                                            <div className="list-text">
-                                                <div className="category-name">業務改善</div>
-                                                <div className="task-name">{task}</div>
-                                            </div>
-                                        </label>
-                                    ))}
-                                </div>
+                            <div className="list-box">
+                                {searchResults.map((task) => (
+                                    <label key={task} className="list-item-2line">
+                                        <input
+                                            type="checkbox"
+                                            checked={checkedResults.includes(task)}
+                                            onChange={() => toggleCheck(task)}
+                                        />
+                                        <div className="list-text">
+                                            <div className="category-name">業務改善</div>
+                                            <div className="task-name">{task}</div>
+                                        </div>
+                                    </label>
+                                ))}
                             </div>
                         </div>
 
@@ -162,33 +163,38 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                             </button>
                         </div>
 
-                        {/* 右：お気に入り */}
+                        {/* 右：お気に入り（デザイン統一済み） */}
                         <div className="task-list">
                             <div className="list-header">
                                 <span className="modal-label">お気に入り間接タスク項目</span>
                                 <span className="count">{favoriteTasks.length}件</span>
                             </div>
 
-                            <div className="list-checkbox-area">
-                                <div className="list-subheader">
-                                    <input type="checkbox" />
-                                    <span className="subcat-title">サブカテゴリ名</span>
+                            <div className="list-subheader">
+                                <div className="list-subheader-left">
+                                    <FaIcons.FaCheckSquare className="check-icon" />
+                                    <FaIcons.FaChevronDown className="list-subheader-right" />
+                                    <span className="label-text">サブカテゴリ</span>
+                                    <FaIcons.FaTasks className="task-icon" />
                                 </div>
+                            </div>
 
-                                <div className="list-box">
-                                    {favoriteTasks.map((task) => (
-                                        <div key={task} className="list-item-2line">
-                                            <input type="checkbox" checked readOnly />
-                                            <div className="list-text">
-                                                <div className="category-name">業務改善</div>
-                                                <div className="task-name">{task}</div>
-                                            </div>
-                                            <button className="btn-delete" onClick={() => removeFavorite(task)}>
-                                                <FaIcons.FaTimes />
-                                            </button>
+                            <div className="list-box">
+                                {favoriteTasks.map((task) => (
+                                    <div key={task} className="list-item-2line">
+                                        <input type="checkbox" checked readOnly />
+                                        <div className="list-text">
+                                            <div className="category-name">業務改善</div>
+                                            <div className="task-name">{task}</div>
                                         </div>
-                                    ))}
-                                </div>
+                                        <button
+                                            className="btn-delete"
+                                            onClick={() => removeFavorite(task)}
+                                        >
+                                            <FaIcons.FaTimes />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -199,10 +205,7 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                     <button className="btn-cancel" onClick={onClose}>
                         キャンセル
                     </button>
-                    <button
-                        className="btn-create"
-                        onClick={() => onSave(favoriteTasks)}
-                    >
+                    <button className="btn-create" onClick={() => onSave(favoriteTasks)}>
                         保存
                     </button>
                 </div>

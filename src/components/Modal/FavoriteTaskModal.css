@@ -159,59 +159,96 @@
     background-color: rgba(0, 137, 186, 0.08);
 }
 
-/* ====== 下部タスクリストレイアウト ====== */
+/* ====== タスクリスト全体 ====== */
 .task-grid {
     display: grid;
     grid-template-columns: 1fr 80px 1fr;
     gap: 20px;
-    align-items: flex-start;
+    /* align-items: flex-start; */
 }
 
+/* ====== リスト枠 ====== */
 .task-list {
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 16px;
-    background: var(--bg-light);
-    min-height: 320px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
 }
 
+/* ✅ 検索結果ヘッダー（枠外） */
 .list-header {
     display: flex;
     justify-content: space-between;
-    font-weight: 600;
-    margin-bottom: 10px;
-    color: var(--main-color);
+    align-items: center;
+    margin-bottom: 6px;
 }
 
-/* ====== 新しいチェックボックスエリア ====== */
+.list-header span {
+    color: var(--main-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* ✅ チェックボックス＋サブカテゴリ囲み */
 .list-checkbox-area {
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    background: #fff;
+    background: var(--bg-light);
     padding: 10px 12px;
-    margin-top: 6px;
+    margin-bottom: 12px;
 }
 
+/* ✅ サブカテゴリ名エリア（新仕様） */
 .list-subheader {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    color: #555;
-    margin-bottom: 10px;
+    justify-content: space-between;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: #fff;
 }
 
-.list-subheader input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--main-color);
-    cursor: pointer;
+.list-subheader-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* ====== 2行構成リストアイテム ====== */
+/* ✅ アイコン・文字をすべてメインカラーに統一 */
+.list-subheader .check-icon,
+.list-subheader .list-subheader-right,
+.list-subheader .task-icon,
+.list-subheader .label-text {
+    color: var(--main-color);
+}
+
+/* テキストを少し太字に */
+.list-subheader .label-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* ====== リストボックス（チェックリスト） ====== */
+.list-box {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+    overflow-y: auto;
+    max-height: 240px;
+}
+
+.list-box.empty::before {
+    content: 'データがありません';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 0.9rem;
+    height: 100%;
+}
+
+/* ====== 2行構成アイテム ====== */
 .list-item-2line {
     display: flex;
     align-items: flex-start;
@@ -249,26 +286,6 @@
     font-size: 0.85rem;
 }
 
-/* ====== リストボックス全体 ====== */
-.list-box {
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    background: var(--bg-light);
-    padding: 8px;
-    overflow-y: auto;
-    max-height: 240px;
-}
-
-.list-box.empty::before {
-    content: 'データがありません';
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #aaa;
-    font-size: 0.9rem;
-    height: 100%;
-}
-
 /* ====== 削除ボタン ====== */
 .btn-delete {
     margin-left: auto;
@@ -284,7 +301,7 @@
     opacity: 0.7;
 }
 
-/* ====== 中央の移動ボタン ====== */
+/* ====== 移動ボタン ====== */
 .move-button-container {
     display: flex;
     justify-content: center;
