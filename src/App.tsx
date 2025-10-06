@@ -10,7 +10,8 @@ import { FavoriteTaskModal } from './components/Modal/FavoriteTaskModal';
 import { UserListModal } from './components/Modal/UserListModal';
 
 function App() {
-  const [viewMode, setViewMode] = useState<'1日' | '3日' | '週'>('週');
+  // ✅ カレンダービュー（1日 / 3日 / 週）
+  const [calendarView, setCalendarView] = useState<'1日' | '3日' | '週'>('週');
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // ✅ カレンダーイベント一覧
@@ -25,13 +26,13 @@ function App() {
   // ========= カレンダー制御 ========= //
   const handlePrev = () => {
     const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() - (viewMode === '週' ? 7 : viewMode === '3日' ? 3 : 1));
+    newDate.setDate(currentDate.getDate() - (calendarView === '週' ? 7 : calendarView === '3日' ? 3 : 1));
     setCurrentDate(newDate);
   };
 
   const handleNext = () => {
     const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() + (viewMode === '週' ? 7 : viewMode === '3日' ? 3 : 1));
+    newDate.setDate(currentDate.getDate() + (calendarView === '週' ? 7 : calendarView === '3日' ? 3 : 1));
     setCurrentDate(newDate);
   };
 
@@ -86,7 +87,6 @@ function App() {
     setSelectedDateTime(null);
   };
 
-
   // ========= お気に入り間接タスク ========= //
   const handleFavoriteSave = (tasks: string[]) => {
     console.log('お気に入り間接タスク:', tasks);
@@ -105,22 +105,20 @@ function App() {
       <main className="main-layout">
         <div className="content-wrapper">
           <ContentHeader
-            viewMode={viewMode}
-            onViewChange={setViewMode}
+            calendarView={calendarView}             // ← viewMode → calendarView に変更
+            onCalendarViewChange={setCalendarView}   // ← 独立ハンドラ
             onPrev={handlePrev}
             onNext={handleNext}
             onToday={handleToday}
             currentDate={currentDate}
-            // ✅ 新規ボタンでモーダルを開く
             onOpenNewEntry={handleOpenNewEntry}
           />
 
           <div className="content-body">
             <Sidebar />
             <div className="main-calendar">
-              {/* ✅ カレンダーにイベント一覧を渡す */}
               <CalendarView
-                viewMode={viewMode}
+                viewMode={calendarView}              // ← 同じく変更
                 currentDate={currentDate}
                 onDateChange={setCurrentDate}
                 onDateClick={handleDateClick}

@@ -1,41 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import './ContentHeader.css';
 
 interface ContentHeaderProps {
-    viewMode: '1日' | '3日' | '週';
-    onViewChange: (mode: '1日' | '3日' | '週') => void;
+    calendarView: '1日' | '3日' | '週';
+    onCalendarViewChange: (mode: '1日' | '3日' | '週') => void;
     onPrev: () => void;
     onNext: () => void;
     onToday: () => void;
     currentDate: Date;
-    onOpenNewEntry: () => void; // ✅ 追加
+    onOpenNewEntry: () => void;
 }
 
 export const ContentHeader: React.FC<ContentHeaderProps> = ({
-    viewMode,
-    onViewChange,
+    calendarView,
+    onCalendarViewChange,
     onPrev,
     onNext,
     onToday,
     onOpenNewEntry,
 }) => {
+    // ✅ 独立したメインタブの状態
+    const [mainTab, setMainTab] = useState<'ユーザー一覧' | '間接タスク'>('ユーザー一覧');
+
     const today = new Date();
     const todayStr = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
 
     return (
         <div className="content-header">
             <div className="content-left">
+                {/* ✅ メインタブ：独立管理 */}
                 <div className="content-tabs">
                     <button
-                        className={`tab ${viewMode === '週' ? 'active' : ''}`}
-                        onClick={() => onViewChange('週')}
+                        className={`tab ${mainTab === 'ユーザー一覧' ? 'active' : ''}`}
+                        onClick={() => setMainTab('ユーザー一覧')}
                     >
                         ユーザー一覧
                     </button>
                     <button
-                        className={`tab ${viewMode === '3日' ? 'active' : ''}`}
-                        onClick={() => onViewChange('3日')}
+                        className={`tab ${mainTab === '間接タスク' ? 'active' : ''}`}
+                        onClick={() => setMainTab('間接タスク')}
                     >
                         間接タスク
                     </button>
@@ -66,12 +70,13 @@ export const ContentHeader: React.FC<ContentHeaderProps> = ({
                     <FaIcons.FaRegCalendarAlt className="date-icon" />
                 </div>
 
+                {/* ✅ ビュー切り替えは別 state */}
                 <div className="view-tabs">
                     {['1日', '3日', '週'].map((v) => (
                         <button
                             key={v}
-                            className={`view-tab ${viewMode === v ? 'active' : ''}`}
-                            onClick={() => onViewChange(v as '1日' | '3日' | '週')}
+                            className={`view-tab ${calendarView === v ? 'active' : ''}`}
+                            onClick={() => onCalendarViewChange(v as '1日' | '3日' | '週')}
                         >
                             {v}
                         </button>

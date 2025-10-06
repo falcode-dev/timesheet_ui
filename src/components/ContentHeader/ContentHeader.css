@@ -52,9 +52,9 @@
     border-right: 1px solid var(--main-color);
 }
 
-.tab:hover {
+/* .tab:hover {
     background-color: rgba(0, 137, 186, 0.08);
-}
+} */
 
 /* ===== ＋ボタン ===== */
 .add-entry-button {
@@ -175,9 +175,9 @@
     border-right: 1px solid var(--main-color);
 }
 
-.view-tab:hover {
+/* .view-tab:hover {
     background-color: rgba(0, 137, 186, 0.08);
-}
+} */
 
 /* ===== レスポンシブ ===== */
 @media (max-width: 1024px) {
