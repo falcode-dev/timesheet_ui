@@ -84,8 +84,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 slotDuration="00:30:00"
                 height="100%"
                 nowIndicator
-                slotMinTime="06:00:00"
-                slotMaxTime="22:00:00"
+                slotMinTime="00:00:00"
+                slotMaxTime="24:00:00"
                 locale={jaLocale}
                 views={{
                     timeGridThreeDay: {

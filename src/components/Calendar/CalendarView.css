@@ -10,7 +10,23 @@
     flex-direction: column;
     background-color: #fff;
     overflow: hidden;
-    /* ← PC時は固定 */
+    position: relative;
+}
+
+/* ✅ FullCalendarを親いっぱいに広げる */
+.calendar-wrapper .fc {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ✅ 内部要素も高さを引き継ぐ */
+.fc-view-harness,
+.fc-view-harness-active,
+.fc-scroller {
+    height: 100% !important;
 }
 
 /* FullCalendar 基本設定 */
@@ -95,28 +111,40 @@
     }
 }
 
-/* --- スマホ --- */
+/* --- スマホ（768px以下） --- */
 @media (max-width: 768px) {
 
-    /* ✅ 横スクロール許可（内部スクロール） */
+    /* ✅ 横・縦スクロール両対応 */
     .calendar-wrapper {
         overflow-x: auto;
+        overflow-y: auto;
+        /* ←縦スクロールを有効に */
+        -webkit-overflow-scrolling: touch;
+        max-height: 100%;
+        /* 親の高さを超えない */
+        padding: 4px;
+    }
+
+    /* ✅ FullCalendar本体を横に広くしてスクロール発生 */
+    .calendar-wrapper .fc {
+        min-width: 800px;
+        height: 100%;
+    }
+
+    /* ✅ FullCalendar内部の縦スクロールを再有効化 */
+    .fc-scroller {
+        overflow-y: auto !important;
+        /* ←縦スクロール復活 */
+        overflow-x: visible !important;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* ✅ FullCalendar 内部に横幅を指定してスワイプ可能に */
-    .calendar-wrapper .fc {
-        min-width: 700px;
-        /* ← 横スクロール発生ポイント */
-    }
-
-    /* ✅ 時間軸が潰れないように固定 */
+    /* ✅ 時間軸はsticky解除（スマホでズレるため） */
     .fc-timegrid-axis {
-        min-width: 45px;
-        background-color: #fff;
-        position: sticky;
-        left: 0;
-        z-index: 2;
+        position: relative !important;
+        left: auto !important;
+        z-index: auto !important;
+        background: transparent !important;
     }
 
     .fc {
@@ -131,12 +159,17 @@
     .fc .fc-daygrid-day-frame {
         min-height: 60px;
     }
+
+    .fc .fc-scrollgrid {
+        box-shadow: none;
+    }
 }
 
-/* --- 小型スマホ --- */
+/* --- 小型スマホ（480px以下） --- */
 @media (max-width: 480px) {
     .calendar-wrapper .fc {
-        min-width: 600px;
+        min-width: 650px;
+        height: 100%;
     }
 
     .fc {
