@@ -58,16 +58,20 @@ function App() {
     let start: Date;
     let end: Date;
 
-    // 🧩 カレンダー or ボタンのどちらからでも登録可能に
-    if (selectedDateTime) {
-      start = selectedDateTime.start;
-      end = selectedDateTime.end;
-    } else {
-      // モーダルで入力された日時から生成
+    // 🧩 モーダル入力を優先
+    if (data.startDate && data.startHour && data.startMinute) {
       const startStr = data.startDate.replace(/\//g, '-');
       const endStr = data.endDate.replace(/\//g, '-');
       start = new Date(`${startStr}T${data.startHour}:${data.startMinute}:00`);
       end = new Date(`${endStr}T${data.endHour}:${data.endMinute}:00`);
+    } else if (selectedDateTime) {
+      // 入力が空の場合のみ選択範囲を使う
+      start = selectedDateTime.start;
+      end = selectedDateTime.end;
+    } else {
+      // どちらもなければ現在時刻を仮設定
+      start = new Date();
+      end = new Date(start.getTime() + 60 * 60 * 1000);
     }
 
     const newEvent = {
@@ -81,6 +85,7 @@ function App() {
     setIsModalOpen(false);
     setSelectedDateTime(null);
   };
+
 
   // ========= お気に入り間接タスク ========= //
   const handleFavoriteSave = (tasks: string[]) => {

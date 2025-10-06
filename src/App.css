@@ -41,7 +41,7 @@ header {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid #ddd;
-  margin: 12px;
+  margin: 0 12px 12px;
   overflow: hidden;
 }
 
