@@ -71,49 +71,19 @@ export const Sidebar: React.FC = () => {
                 onChange={(e) => setQuery(e.target.value)}
             />
 
-            {/* チェックボックス：自分 */}
-            <div className="sidebar-self">
-                <label>
-                    <input type="checkbox" defaultChecked />
-                    社員番号（自分）
-                </label>
-                <div className="sidebar-self-name">社員名 XXX XXX</div>
-            </div>
-
-            <div className="sidebar-divider">
-                <FaIcons.FaChevronDown className="sidebar-icon" />
-            </div>
-
-            {/* 検索結果 */}
-            <div className="sidebar-results">
-                {filtered.map((u) => (
-                    <div key={u.id} className="sidebar-user">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={selectedUsers.some((s) => s.id === u.id)}
-                                onChange={() => toggleUser(u)}
-                            />
-                            {searchType === 'name'
-                                ? `${u.name}（${u.number}）`
-                                : `${u.number}：${u.name}`}
-                        </label>
-                    </div>
-                ))}
-            </div>
-
-            {/* 選択済みユーザー */}
-            <div className="sidebar-favorites">
-                <div className="sidebar-fav-header">
-                    <FaIcons.FaStar className="sidebar-icon-star" /> 選択済みユーザー
+            {/* 自分情報 */}
+            <div className="sidebar-self-top">
+                <input type="checkbox" checked readOnly className="sidebar-self-checkbox" />
+                <div className="sidebar-self-text">
+                    <span className="sidebar-self-number">社員番号（自分）</span>
+                    <span className="sidebar-self-roman">TARO TANAKA</span>
                 </div>
-                <ul>
-                    {selectedUsers.map((u) => (
-                        <li key={u.id} className="sidebar-fav-item">
-                            {u.name}（{u.number}）
-                        </li>
-                    ))}
-                </ul>
+            </div>
+
+            <div className="sidebar-self-divider">
+                <FaIcons.FaChevronDown className="sidebar-self-icon" />
+                <span className="sidebar-self-label">ユーザー名</span>
+                <FaIcons.FaTasks className="sidebar-self-icon" />
             </div>
         </aside>
     );
