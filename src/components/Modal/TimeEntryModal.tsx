@@ -6,17 +6,23 @@ interface TimeEntryModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: any) => void;
+    onDelete?: (id: string) => void;
     selectedDateTime?: { start: Date; end: Date } | null;
+    selectedEvent?: any | null;
 }
 
 export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     isOpen,
     onClose,
     onSubmit,
+    onDelete,
     selectedDateTime,
+    selectedEvent,
 }) => {
     const [isMounted, setIsMounted] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+
+    const [title, setTitle] = useState('');
     const [comment, setComment] = useState('');
     const maxLength = 2000;
 
@@ -27,25 +33,36 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     const [endHour, setEndHour] = useState('');
     const [endMinute, setEndMinute] = useState('');
 
-    // 🔹 date input 参照を保持（アイコンクリックで showPicker() するため）
     const startDateRef = useRef<HTMLInputElement>(null);
     const endDateRef = useRef<HTMLInputElement>(null);
 
-    // ✅ 初期表示：カレンダー範囲を反映
+    // ✅ 初期化（イベント or 新規）
     useEffect(() => {
-        if (selectedDateTime) {
-            const { start, end } = selectedDateTime;
+        if (selectedEvent) {
+            const start = new Date(selectedEvent.start);
+            const end = new Date(selectedEvent.end);
 
-            const startYMD = start.toISOString().split('T')[0];
-            const endYMD = end.toISOString().split('T')[0];
-
-            setStartDate(startYMD);
+            setTitle(selectedEvent.title || '');
+            setComment(selectedEvent.extendedProps?.comment || '');
+            setStartDate(start.toISOString().split('T')[0]);
             setStartHour(start.getHours().toString().padStart(2, '0'));
             setStartMinute(start.getMinutes().toString().padStart(2, '0'));
-            setEndDate(endYMD);
+            setEndDate(end.toISOString().split('T')[0]);
+            setEndHour(end.getHours().toString().padStart(2, '0'));
+            setEndMinute(end.getMinutes().toString().padStart(2, '0'));
+        } else if (selectedDateTime) {
+            const { start, end } = selectedDateTime;
+            setTitle('');
+            setComment('');
+            setStartDate(start.toISOString().split('T')[0]);
+            setStartHour(start.getHours().toString().padStart(2, '0'));
+            setStartMinute(start.getMinutes().toString().padStart(2, '0'));
+            setEndDate(end.toISOString().split('T')[0]);
             setEndHour(end.getHours().toString().padStart(2, '0'));
             setEndMinute(end.getMinutes().toString().padStart(2, '0'));
         } else {
+            setTitle('');
+            setComment('');
             setStartDate('');
             setStartHour('');
             setStartMinute('');
@@ -53,9 +70,9 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
             setEndHour('');
             setEndMinute('');
         }
-    }, [selectedDateTime]);
+    }, [selectedEvent, selectedDateTime]);
 
-    // ✅ モーダル開閉アニメーション制御
+    // ✅ モーダル開閉アニメーション
     useEffect(() => {
         if (isOpen) {
             setIsMounted(true);
@@ -70,19 +87,59 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
 
     if (!isMounted) return null;
 
+    const handleSave = () => {
+        const start = new Date(`${startDate}T${startHour}:${startMinute}`);
+        const end = new Date(`${endDate}T${endHour}:${endMinute}`);
+
+        const data = {
+            id: selectedEvent?.id || Date.now().toString(),
+            title: title || '無題のイベント',
+            start,
+            end,
+            extendedProps: { comment },
+        };
+        onSubmit(data);
+        onClose();
+    };
+
+    const handleDelete = () => {
+        if (selectedEvent && onDelete) {
+            if (window.confirm(`「${selectedEvent.title}」を削除しますか？`)) {
+                onDelete(selectedEvent.id);
+                onClose();
+            }
+        }
+    };
+
     return (
         <div className={`modal-overlay ${isVisible ? 'fade-in' : 'fade-out'}`}>
             <div className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
                 {/* ヘッダー */}
                 <div className="modal-header">
-                    <h3 className="modal-title">新しいタイムエントリを作成</h3>
+                    <h3 className="modal-title">
+                        {selectedEvent ? 'イベントを編集' : '新しいタイムエントリを作成'}
+                    </h3>
                 </div>
 
                 {/* 本文 */}
                 <div className="modal-body">
                     <p className="modal-description">
-                        Time Entry の基本情報を入力して作成を押してください。
+                        {selectedEvent
+                            ? '選択したイベントを編集できます。'
+                            : 'Time Entry の基本情報を入力して作成を押してください。'}
                     </p>
+
+                    {/* ✅ タイトル（CSS統一版） */}
+                    <label className="modal-label">タイトル</label>
+                    <div className="modal-select full-width">
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="タイトルを入力"
+                        />
+                    </div>
 
                     {/* WO番号 */}
                     <label className="modal-label">WO番号</label>
@@ -238,24 +295,16 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                 {/* フッター */}
                 <div className="modal-footer">
                     <div className="footer-right">
+                        {/* {selectedEvent && (
+                            <button className="btn-delete" onClick={handleDelete}>
+                                削除
+                            </button>
+                        )} */}
                         <button className="btn-cancel" onClick={onClose}>
                             キャンセル
                         </button>
-                        <button
-                            className="btn-create"
-                            onClick={() =>
-                                onSubmit({
-                                    startDate,
-                                    startHour,
-                                    startMinute,
-                                    endDate,
-                                    endHour,
-                                    endMinute,
-                                    comment,
-                                })
-                            }
-                        >
-                            作成
+                        <button className="btn-create" onClick={handleSave}>
+                            {selectedEvent ? '更新' : '作成'}
                         </button>
                     </div>
                 </div>

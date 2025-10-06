@@ -53,6 +53,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
+    /* ✅ これを追加 */
 }
 
 /* 日付の数字 */

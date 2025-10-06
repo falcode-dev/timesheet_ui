@@ -37,6 +37,16 @@
     transform: translateY(-24px);
     opacity: 0;
     transition: all 0.35s ease;
+    /* ✅ スクロールバーを非表示にする */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE・Edge対応 */
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none;
+    /* Chrome / Safari */
 }
 
 .modal-content.fade-in {

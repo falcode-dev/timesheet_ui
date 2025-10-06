@@ -20,6 +20,7 @@ function App() {
   // ✅ モーダル関連
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState<{ start: Date; end: Date } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
   const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
   const [isUserListModalOpen, setIsUserListModalOpen] = useState(false);
 
@@ -66,19 +67,14 @@ function App() {
 
     try {
       const userId = xrm.Utility.getGlobalContext().userSettings.userId.replace(/[{}]/g, '');
-
-      // ✅ 親エンティティ（proto_test1）
       const entityName = 'proto_workorder';
+      const navigationName = 'proto_timeentry_wonumber_proto_workorder';
 
-      // ✅ 子エンティティとのリレーションスキーマ名（Power Apps の関係名）
-      const navigationName = 'proto_timeentry_wonumber_proto_workorder'; // ← 環境に合わせて修正
-
-      // ✅ Web API クエリ
       const query =
         `?$select=proto_workorderid,createdon,_createdby_value` +
         `&$filter=_createdby_value eq ${userId}` +
         `&$expand=${navigationName}(` +
-        `$select=proto_timeentryid,proto_startdatetime,proto_enddatetime,createdon,proto_name)`; // 子テーブル列指定
+        `$select=proto_timeentryid,proto_startdatetime,proto_enddatetime,createdon,proto_name)`;
 
       console.log('🧩 Dataverse Fetch Query:', query);
 
@@ -86,7 +82,6 @@ function App() {
         .then((result: any) => {
           console.log('✅ proto_test1 データ取得成功:', result);
 
-          // カレンダーイベント整形
           const formattedEvents = result.entities.flatMap((p: any) =>
             (p[navigationName] || []).map((child: any) => ({
               id: child.proto_timeentryid,
@@ -126,73 +121,38 @@ function App() {
 
   const handleToday = () => setCurrentDate(new Date());
 
-  // ========= 日付クリック（範囲選択） ========= //
+  // ========= 日付クリック（新規作成） ========= //
   const handleDateClick = (range: { start: Date; end: Date }) => {
+    setSelectedEvent(null); // ★新規モードにする
     setSelectedDateTime(range);
     setIsModalOpen(true);
   };
 
-  // ========= 新しいタイムエントリ作成 ========= //
-  const handleOpenNewEntry = () => {
-    const start = new Date();
-    start.setHours(9, 0, 0, 0);
-    const end = new Date();
-    end.setHours(10, 0, 0, 0);
-    setSelectedDateTime({ start, end });
+  // ========= イベントクリック（編集） ========= //
+  const handleEventClick = (eventData: any) => {
+    setSelectedEvent(eventData); // ★編集モードにする
+    setSelectedDateTime(null);
     setIsModalOpen(true);
   };
 
-  // ========= モーダルで作成押下 ========= //
+  // ========= モーダルで作成・更新押下 ========= //
   const handleModalSubmit = (data: any) => {
-    let start: Date;
-    let end: Date;
+    setEvents((prev) => {
+      const exists = prev.find((e) => e.id === data.id);
+      return exists
+        ? prev.map((e) => (e.id === data.id ? data : e))
+        : [...prev, data];
+    });
 
-    if (data.startDate && data.startHour && data.startMinute) {
-      const startStr = data.startDate.replace(/\//g, '-');
-      const endStr = data.endDate.replace(/\//g, '-');
-      start = new Date(`${startStr}T${data.startHour}:${data.startMinute}:00`);
-      end = new Date(`${endStr}T${data.endHour}:${data.endMinute}:00`);
-    } else if (selectedDateTime) {
-      start = selectedDateTime.start;
-      end = selectedDateTime.end;
-    } else {
-      start = new Date();
-      end = new Date(start.getTime() + 60 * 60 * 1000);
-    }
-
-    const newEvent = {
-      id: String(Date.now()),
-      title: data.comment || '新しい予定',
-      start,
-      end,
-    };
-
-    setEvents((prev) => [...prev, newEvent]);
+    // ✅ 閉じるときに状態をクリア
     setIsModalOpen(false);
+    setSelectedEvent(null);
     setSelectedDateTime(null);
-  };
-
-  // ========= お気に入り間接タスク ========= //
-  const handleFavoriteSave = (tasks: string[]) => {
-    console.log('お気に入り間接タスク:', tasks);
-    setIsFavoriteModalOpen(false);
-  };
-
-  // ========= ユーザー一覧設定 ========= //
-  const handleUserListSave = (users: string[]) => {
-    console.log('ユーザー一覧設定:', users);
-    setIsUserListModalOpen(false);
   };
 
   return (
     <div className="app-container">
       <Header />
-
-      {/* ✅ Dataverse 情報表示 */}
-      {/* <div className="dataverse-debug">
-        <h3>🧩 Dataverse 接続情報</h3>
-        <pre className="dataverse-info">{dataverseInfo}</pre>
-      </div> */}
 
       <main className="main-layout">
         <div className="content-wrapper">
@@ -203,7 +163,7 @@ function App() {
             onNext={handleNext}
             onToday={handleToday}
             currentDate={currentDate}
-            onOpenNewEntry={handleOpenNewEntry}
+            onOpenNewEntry={() => handleDateClick({ start: new Date(), end: new Date(new Date().getTime() + 60 * 60 * 1000) })}
           />
 
           <div className="content-body">
@@ -214,6 +174,7 @@ function App() {
                 currentDate={currentDate}
                 onDateChange={setCurrentDate}
                 onDateClick={handleDateClick}
+                onEventClick={handleEventClick}
                 events={events}
               />
             </div>
@@ -229,23 +190,28 @@ function App() {
       {/* ✅ タイムエントリモーダル */}
       <TimeEntryModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedEvent(null); // ★閉じるときにリセット
+          setSelectedDateTime(null);
+        }}
         onSubmit={handleModalSubmit}
         selectedDateTime={selectedDateTime}
+        selectedEvent={selectedEvent}
       />
 
       {/* ✅ お気に入り間接タスクモーダル */}
       <FavoriteTaskModal
         isOpen={isFavoriteModalOpen}
         onClose={() => setIsFavoriteModalOpen(false)}
-        onSave={handleFavoriteSave}
+        onSave={(tasks) => setIsFavoriteModalOpen(false)}
       />
 
       {/* ✅ ユーザー一覧設定モーダル */}
       <UserListModal
         isOpen={isUserListModalOpen}
         onClose={() => setIsUserListModalOpen(false)}
-        onSave={handleUserListSave}
+        onSave={(users) => setIsUserListModalOpen(false)}
       />
     </div>
   );

@@ -12,7 +12,8 @@ interface CalendarViewProps {
     currentDate: Date;
     onDateChange: (newDate: Date) => void;
     onDateClick?: (range: { start: Date; end: Date }) => void;
-    events: any[]; // ✅ 追加
+    onEventClick?: (eventData: any) => void; // ✅ 追加：イベントクリック時
+    events: any[];
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -20,28 +21,37 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     currentDate,
     onDateChange,
     onDateClick,
+    onEventClick,
     events,
 }) => {
     const calendarRef = useRef<FullCalendar>(null);
 
-    /** ✅ 範囲選択 or クリック時 */
+    /** ✅ 日付範囲選択（クリック）時 */
     const handleDateSelect = (selectInfo: DateSelectArg) => {
         const start = selectInfo.start;
         const end = selectInfo.end ?? new Date(start.getTime() + 60 * 60 * 1000);
         onDateClick?.({ start, end });
     };
 
-    /** ✅ イベント削除 */
+    /** ✅ イベントクリック時：モーダル表示トリガー */
     const handleEventClick = (clickInfo: EventClickArg) => {
-        if (window.confirm(`「${clickInfo.event.title}」を削除しますか？`)) {
-            clickInfo.event.remove();
-        }
+        const event = clickInfo.event;
+
+        // ✅ 親へクリックイベントデータを通知
+        onEventClick?.({
+            id: event.id,
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            extendedProps: event.extendedProps,
+        });
     };
 
-    /** ✅ ビュー切り替え */
+    /** ✅ ビュー切り替え処理 */
     useEffect(() => {
         const api = calendarRef.current?.getApi();
         if (!api) return;
+
         api.gotoDate(currentDate);
 
         switch (viewMode) {
@@ -81,7 +91,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 selectMirror
                 select={handleDateSelect}
                 eventClick={handleEventClick}
-                events={events} // ✅ ここで表示
+                events={events}
                 headerToolbar={false}
                 allDaySlot={false}
                 slotDuration="00:30:00"
