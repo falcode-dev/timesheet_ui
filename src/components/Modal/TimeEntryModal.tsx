@@ -6,7 +6,7 @@ interface TimeEntryModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: any) => void;
-    selectedDateTime?: Date | null; // ✅ カレンダークリックで渡ってくる日時
+    selectedDateTime?: { start: Date; end: Date } | null;
 }
 
 export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
@@ -27,25 +27,21 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     const [endHour, setEndHour] = useState('');
     const [endMinute, setEndMinute] = useState('');
 
-    // 🧩 日付クリックで自動反映
+    // ✅ 初期表示：カレンダー範囲を反映
     useEffect(() => {
         if (selectedDateTime) {
-            const date = selectedDateTime;
-            const startYMD = date.toISOString().split('T')[0].replace(/-/g, '/');
-            const startH = date.getHours();
-            const startM = date.getMinutes();
+            const { start, end } = selectedDateTime;
 
-            const end = new Date(date.getTime() + 60 * 60 * 1000); // +1時間
-            const endYMD = end.toISOString().split('T')[0].replace(/-/g, '/');
+            const startYMD = start.toISOString().split('T')[0];
+            const endYMD = end.toISOString().split('T')[0];
 
             setStartDate(startYMD);
-            setStartHour(startH.toString().padStart(2, '0'));
-            setStartMinute(startM.toString().padStart(2, '0'));
+            setStartHour(start.getHours().toString().padStart(2, '0'));
+            setStartMinute(start.getMinutes().toString().padStart(2, '0'));
             setEndDate(endYMD);
             setEndHour(end.getHours().toString().padStart(2, '0'));
             setEndMinute(end.getMinutes().toString().padStart(2, '0'));
         } else {
-            // 新規作成ボタンなどで開いた場合、空欄にリセット
             setStartDate('');
             setStartHour('');
             setStartMinute('');
@@ -55,7 +51,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
         }
     }, [selectedDateTime]);
 
-    // 🧩 フェードアニメーション制御
+    // ✅ モーダル開閉アニメーション制御
     useEffect(() => {
         if (isOpen) {
             setIsMounted(true);
@@ -73,12 +69,12 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     return (
         <div className={`modal-overlay ${isVisible ? 'fade-in' : 'fade-out'}`}>
             <div className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
-                {/* モーダルヘッダー */}
+                {/* ヘッダー */}
                 <div className="modal-header">
                     <h3 className="modal-title">新しいタイムエントリを作成</h3>
                 </div>
 
-                {/* モーダル本文 */}
+                {/* 本文 */}
                 <div className="modal-body">
                     <p className="modal-description">
                         Time Entry の基本情報を入力して作成を押してください。
@@ -92,22 +88,38 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                     </div>
 
                     <div className="modal-grid">
-                        {/* 左グリッド */}
+                        {/* 左カラム */}
                         <div className="grid-left">
                             {/* 開始日 */}
                             <label className="modal-label">スケジュール開始日</label>
                             <div className="datetime-row">
                                 <div className="date-input">
-                                    <input type="text" value={startDate} readOnly />
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
                                     <FaIcons.FaRegCalendarAlt className="icon" />
                                 </div>
                                 <div className="time-input">
-                                    <input type="text" value={startHour} readOnly />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="23"
+                                        value={startHour}
+                                        onChange={(e) => setStartHour(e.target.value)}
+                                    />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
                                 <div className="minute-input">
-                                    <input type="text" value={startMinute} readOnly />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        value={startMinute}
+                                        onChange={(e) => setStartMinute(e.target.value)}
+                                    />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
@@ -116,16 +128,32 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <label className="modal-label">スケジュール終了日</label>
                             <div className="datetime-row">
                                 <div className="date-input">
-                                    <input type="text" value={endDate} readOnly />
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
                                     <FaIcons.FaRegCalendarAlt className="icon" />
                                 </div>
                                 <div className="time-input">
-                                    <input type="text" value={endHour} readOnly />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="23"
+                                        value={endHour}
+                                        onChange={(e) => setEndHour(e.target.value)}
+                                    />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                                 <span>：</span>
                                 <div className="minute-input">
-                                    <input type="text" value={endMinute} readOnly />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        value={endMinute}
+                                        onChange={(e) => setEndMinute(e.target.value)}
+                                    />
                                     <FaIcons.FaChevronDown className="icon" />
                                 </div>
                             </div>
@@ -147,7 +175,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             <textarea placeholder="リソースの詳細を入力" rows={4}></textarea>
                         </div>
 
-                        {/* 右グリッド */}
+                        {/* 右カラム */}
                         <div className="grid-right">
                             <label className="modal-label">タイムカテゴリ</label>
                             <div className="modal-select">
@@ -192,7 +220,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                     </div>
                 </div>
 
-                {/* モーダルフッター */}
+                {/* フッター */}
                 <div className="modal-footer">
                     <div className="footer-right">
                         <button className="btn-cancel" onClick={onClose}>

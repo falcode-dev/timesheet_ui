@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -11,7 +11,8 @@ interface CalendarViewProps {
     viewMode: '1日' | '3日' | '週';
     currentDate: Date;
     onDateChange: (newDate: Date) => void;
-    onDateClick?: (date: Date) => void;
+    onDateClick?: (range: { start: Date; end: Date }) => void;
+    events: any[]; // ✅ 追加
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -19,19 +20,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     currentDate,
     onDateChange,
     onDateClick,
+    events,
 }) => {
     const calendarRef = useRef<FullCalendar>(null);
-    const [events, setEvents] = useState<any[]>([]);
 
-    /** ✅ 日付クリック通知 */
+    /** ✅ 範囲選択 or クリック時 */
     const handleDateSelect = (selectInfo: DateSelectArg) => {
-        onDateClick?.(selectInfo.start);
+        const start = selectInfo.start;
+        const end = selectInfo.end ?? new Date(start.getTime() + 60 * 60 * 1000);
+        onDateClick?.({ start, end });
     };
 
     /** ✅ イベント削除 */
     const handleEventClick = (clickInfo: EventClickArg) => {
         if (window.confirm(`「${clickInfo.event.title}」を削除しますか？`)) {
-            setEvents((prev) => prev.filter((e) => e.id !== clickInfo.event.id));
+            clickInfo.event.remove();
         }
     };
 
@@ -78,7 +81,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 selectMirror
                 select={handleDateSelect}
                 eventClick={handleEventClick}
-                events={events}
+                events={events} // ✅ ここで表示
                 headerToolbar={false}
                 allDaySlot={false}
                 slotDuration="00:30:00"
