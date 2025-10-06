@@ -76,6 +76,33 @@ footer {
   flex-shrink: 0;
 }
 
+/* ===== Dataverse 情報エリア ===== */
+.dataverse-debug {
+  background: #f9fafc;
+  border-bottom: 1px solid #ddd;
+  padding: 12px 20px;
+}
+
+.dataverse-debug h3 {
+  margin: 0 0 8px 0;
+  color: rgb(0, 137, 186);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.dataverse-info {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.85rem;
+  color: #333;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+
 /* =====================
    ✅ レスポンシブ対応
    ===================== */
