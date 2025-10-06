@@ -129,22 +129,29 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                                 <span className="modal-label">検索結果</span>
                                 <span className="count">{searchResults.length}件</span>
                             </div>
-                            <div className="list-subheader">
-                                <FaIcons.FaCheckSquare className="icon" />
-                                <FaIcons.FaChevronDown className="icon" />
-                                <span>サブカテゴリ名</span>
-                            </div>
-                            <div className="list-box">
-                                {searchResults.map((task) => (
-                                    <label key={task} className="list-item">
-                                        <input
-                                            type="checkbox"
-                                            checked={checkedResults.includes(task)}
-                                            onChange={() => toggleCheck(task)}
-                                        />
-                                        <span>{task}</span>
-                                    </label>
-                                ))}
+
+                            {/* ✅ 枠に入れるチェックエリア */}
+                            <div className="list-checkbox-area">
+                                <div className="list-subheader">
+                                    <input type="checkbox" />
+                                    <span className="subcat-title">サブカテゴリ名</span>
+                                </div>
+
+                                <div className="list-box">
+                                    {searchResults.map((task) => (
+                                        <label key={task} className="list-item-2line">
+                                            <input
+                                                type="checkbox"
+                                                checked={checkedResults.includes(task)}
+                                                onChange={() => toggleCheck(task)}
+                                            />
+                                            <div className="list-text">
+                                                <div className="category-name">業務改善</div>
+                                                <div className="task-name">{task}</div>
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
@@ -161,23 +168,27 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                                 <span className="modal-label">お気に入り間接タスク項目</span>
                                 <span className="count">{favoriteTasks.length}件</span>
                             </div>
-                            <div className="list-subheader">
-                                <FaIcons.FaCheckSquare className="icon" />
-                                <FaIcons.FaChevronDown className="icon" />
-                                <span>サブカテゴリ名</span>
-                            </div>
-                            <div className="list-box">
-                                {favoriteTasks.map((task) => (
-                                    <div key={task} className="list-item">
-                                        <span>{task}</span>
-                                        <button
-                                            className="btn-delete"
-                                            onClick={() => removeFavorite(task)}
-                                        >
-                                            <FaIcons.FaTimes />
-                                        </button>
-                                    </div>
-                                ))}
+
+                            <div className="list-checkbox-area">
+                                <div className="list-subheader">
+                                    <input type="checkbox" />
+                                    <span className="subcat-title">サブカテゴリ名</span>
+                                </div>
+
+                                <div className="list-box">
+                                    {favoriteTasks.map((task) => (
+                                        <div key={task} className="list-item-2line">
+                                            <input type="checkbox" checked readOnly />
+                                            <div className="list-text">
+                                                <div className="category-name">業務改善</div>
+                                                <div className="task-name">{task}</div>
+                                            </div>
+                                            <button className="btn-delete" onClick={() => removeFavorite(task)}>
+                                                <FaIcons.FaTimes />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
