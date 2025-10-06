@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as FaIcons from 'react-icons/fa';
-import './FavoriteTaskModal.css'; // 既存のCSSを再利用（同じデザイン）
+import './FavoriteTaskModal.css'; // ✅ デザイン統一CSSを再利用
 
 interface UserListModalProps {
     isOpen: boolean;
@@ -26,8 +26,9 @@ export const UserListModal: React.FC<UserListModalProps> = ({
     ]);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [checkedResults, setCheckedResults] = useState<string[]>([]);
+    const [checkedSelected, setCheckedSelected] = useState<string[]>([]);
 
-    // 🧩 フェードアニメーション制御
+    // 🧩 モーダル表示アニメーション
     useEffect(() => {
         if (isOpen) {
             setIsMounted(true);
@@ -42,14 +43,14 @@ export const UserListModal: React.FC<UserListModalProps> = ({
 
     if (!isMounted) return null;
 
-    // ✅ チェックボックス制御
+    // ✅ 検索結果チェック制御
     const toggleCheck = (user: string) => {
         setCheckedResults((prev) =>
             prev.includes(user) ? prev.filter((u) => u !== user) : [...prev, user]
         );
     };
 
-    // ✅ 「＞」ボタンで右側に追加
+    // ✅ 「＞」で右側へ追加
     const moveToSelected = () => {
         const newSelected = [...selectedUsers];
         checkedResults.forEach((user) => {
@@ -59,9 +60,23 @@ export const UserListModal: React.FC<UserListModalProps> = ({
         setCheckedResults([]);
     };
 
-    // ✅ 「×」で削除
+    // ✅ 右側チェック制御
+    const toggleSelectedCheck = (user: string) => {
+        setCheckedSelected((prev) =>
+            prev.includes(user) ? prev.filter((u) => u !== user) : [...prev, user]
+        );
+    };
+
+    // ✅ 一括削除
+    const removeCheckedSelected = () => {
+        setSelectedUsers((prev) => prev.filter((u) => !checkedSelected.includes(u)));
+        setCheckedSelected([]);
+    };
+
+    // ✅ 単体削除
     const removeUser = (user: string) => {
         setSelectedUsers((prev) => prev.filter((u) => u !== user));
+        setCheckedSelected((prev) => prev.filter((u) => u !== user));
     };
 
     return (
@@ -69,18 +84,17 @@ export const UserListModal: React.FC<UserListModalProps> = ({
             <div className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
                 {/* ヘッダー */}
                 <div className="modal-header">
-                    <h3 className="modal-title">ユーザー 一覧設定</h3>
+                    <h3 className="modal-title">ユーザー一覧設定</h3>
                 </div>
 
                 {/* 本文 */}
                 <div className="modal-body">
                     <p className="modal-description">
-                        追加したいユーザーを検索してください。
+                        追加したいユーザーを検索し、右側に追加してください。
                     </p>
 
-                    {/* 上部検索グリッド */}
+                    {/* 検索フォーム */}
                     <div className="modal-grid">
-                        {/* 左グリッド */}
                         <div className="grid-left">
                             <label className="modal-label">社員番号</label>
                             <div className="modal-select">
@@ -99,7 +113,6 @@ export const UserListModal: React.FC<UserListModalProps> = ({
                             </div>
                         </div>
 
-                        {/* 右グリッド */}
                         <div className="grid-right">
                             <label className="modal-label">ユーザー名</label>
                             <div className="modal-select">
@@ -119,11 +132,7 @@ export const UserListModal: React.FC<UserListModalProps> = ({
 
                     <hr className="divider" />
 
-                    <p className="modal-description">
-                        検索結果の項目を選択して追加し保存を押してください。
-                    </p>
-
-                    {/* 下部リストエリア */}
+                    {/* 下部リスト */}
                     <div className="task-grid">
                         {/* 左：検索結果 */}
                         <div className="task-list">
@@ -131,53 +140,84 @@ export const UserListModal: React.FC<UserListModalProps> = ({
                                 <span className="modal-label">検索結果</span>
                                 <span className="count">{searchResults.length}件</span>
                             </div>
+
                             <div className="list-subheader">
-                                <FaIcons.FaCheckSquare className="icon" />
-                                <FaIcons.FaChevronDown className="icon" />
-                                <span>ユーザー名</span>
+                                <div className="list-subheader-left">
+                                    <FaIcons.FaCheckSquare className="check-icon" />
+                                    <FaIcons.FaChevronDown className="list-subheader-right" />
+                                    <span className="label-text">ユーザー名</span>
+                                    <FaIcons.FaUser className="task-icon" />
+                                </div>
                             </div>
-                            <div
-                                className={`list-box ${searchResults.length === 0 ? 'empty' : ''
-                                    }`}
-                            >
-                                {searchResults.map((user) => (
-                                    <label key={user} className="list-item">
-                                        <input
-                                            type="checkbox"
-                                            checked={checkedResults.includes(user)}
-                                            onChange={() => toggleCheck(user)}
-                                        />
-                                        <span>{user}</span>
-                                    </label>
-                                ))}
+
+                            <div className="list-box">
+                                {searchResults.map((user) => {
+                                    const isSelected = selectedUsers.includes(user);
+                                    return (
+                                        <label
+                                            key={user}
+                                            className={`list-item-2line ${isSelected ? 'disabled-item' : ''}`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                disabled={isSelected}
+                                                checked={checkedResults.includes(user)}
+                                                onChange={() => toggleCheck(user)}
+                                            />
+                                            <div className="list-text">
+                                                <div className="category-name">社員</div>
+                                                <div className="task-name">{user}</div>
+                                            </div>
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </div>
 
-                        {/* 中央：移動ボタン */}
+                        {/* 中央移動ボタン */}
                         <div className="move-button-container">
                             <button className="btn-move" onClick={moveToSelected}>
                                 &gt;
                             </button>
                         </div>
 
-                        {/* 右：設定済ユーザー */}
+                        {/* 右：選択済みユーザー */}
                         <div className="task-list">
                             <div className="list-header">
-                                <span className="modal-label">設定済ユーザー</span>
+                                <span className="modal-label">設定済みユーザー</span>
                                 <span className="count">{selectedUsers.length}件</span>
                             </div>
+
                             <div className="list-subheader">
-                                <FaIcons.FaCheckSquare className="icon" />
-                                <FaIcons.FaChevronDown className="icon" />
-                                <span>ユーザー名</span>
+                                <div className="list-subheader-left">
+                                    <FaIcons.FaCheckSquare className="check-icon" />
+                                    <FaIcons.FaChevronDown className="list-subheader-right" />
+                                    <span className="label-text">ユーザー名</span>
+                                    <FaIcons.FaUser className="task-icon" />
+                                </div>
+                                {selectedUsers.length > 0 && (
+                                    <button
+                                        className="btn-delete-all"
+                                        onClick={removeCheckedSelected}
+                                        title="選択したユーザーを削除"
+                                    >
+                                        <FaIcons.FaTrash />
+                                    </button>
+                                )}
                             </div>
-                            <div
-                                className={`list-box ${selectedUsers.length === 0 ? 'empty' : ''
-                                    }`}
-                            >
+
+                            <div className="list-box">
                                 {selectedUsers.map((user) => (
-                                    <div key={user} className="list-item">
-                                        <span>{user}</span>
+                                    <div key={user} className="list-item-favorite">
+                                        <input
+                                            type="checkbox"
+                                            checked={checkedSelected.includes(user)}
+                                            onChange={() => toggleSelectedCheck(user)}
+                                        />
+                                        <div className="list-text">
+                                            <div className="category-name">社員</div>
+                                            <div className="task-name">{user}</div>
+                                        </div>
                                         <button
                                             className="btn-delete"
                                             onClick={() => removeUser(user)}
