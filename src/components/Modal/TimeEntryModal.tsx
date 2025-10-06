@@ -36,41 +36,68 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     const startDateRef = useRef<HTMLInputElement>(null);
     const endDateRef = useRef<HTMLInputElement>(null);
 
+    // ✅ ローカル日付を YYYY-MM-DD 形式でフォーマット（日本時間対応）
+    const formatLocalDate = (date: Date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     // ✅ 初期化（イベント or 新規）
     useEffect(() => {
+        if (!isOpen) return;
+
+        // ✅ 1. 編集モード（イベントクリック時）
         if (selectedEvent) {
             const start = new Date(selectedEvent.start);
             const end = new Date(selectedEvent.end);
 
             setTitle(selectedEvent.title || '');
             setComment(selectedEvent.extendedProps?.comment || '');
-            setStartDate(start.toISOString().split('T')[0]);
+            setStartDate(formatLocalDate(start));
             setStartHour(start.getHours().toString().padStart(2, '0'));
             setStartMinute(start.getMinutes().toString().padStart(2, '0'));
-            setEndDate(end.toISOString().split('T')[0]);
+            setEndDate(formatLocalDate(end));
             setEndHour(end.getHours().toString().padStart(2, '0'));
             setEndMinute(end.getMinutes().toString().padStart(2, '0'));
-        } else if (selectedDateTime) {
+        }
+
+        // ✅ 2. カレンダークリック時（クリックした時間帯を反映）
+        else if (selectedDateTime) {
             const { start, end } = selectedDateTime;
             setTitle('');
             setComment('');
-            setStartDate(start.toISOString().split('T')[0]);
+            setStartDate(formatLocalDate(start));
             setStartHour(start.getHours().toString().padStart(2, '0'));
             setStartMinute(start.getMinutes().toString().padStart(2, '0'));
-            setEndDate(end.toISOString().split('T')[0]);
+            setEndDate(formatLocalDate(end));
             setEndHour(end.getHours().toString().padStart(2, '0'));
             setEndMinute(end.getMinutes().toString().padStart(2, '0'));
-        } else {
+        }
+
+        // ✅ 3. 新規作成ボタン（現在時刻を30分単位に丸め）
+        else {
+            const now = new Date();
+            const minutes = now.getMinutes();
+            const roundedMinutes = minutes < 30 ? 0 : 30;
+
+            const roundedStart = new Date(now);
+            roundedStart.setMinutes(roundedMinutes, 0, 0);
+
+            const roundedEnd = new Date(roundedStart);
+            roundedEnd.setHours(roundedEnd.getHours() + 1);
+
             setTitle('');
             setComment('');
-            setStartDate('');
-            setStartHour('');
-            setStartMinute('');
-            setEndDate('');
-            setEndHour('');
-            setEndMinute('');
+            setStartDate(formatLocalDate(roundedStart));
+            setStartHour(roundedStart.getHours().toString().padStart(2, '0'));
+            setStartMinute(roundedStart.getMinutes().toString().padStart(2, '0'));
+            setEndDate(formatLocalDate(roundedEnd));
+            setEndHour(roundedEnd.getHours().toString().padStart(2, '0'));
+            setEndMinute(roundedEnd.getMinutes().toString().padStart(2, '0'));
         }
-    }, [selectedEvent, selectedDateTime]);
+    }, [isOpen, selectedEvent, selectedDateTime]);
 
     // ✅ モーダル開閉アニメーション
     useEffect(() => {
@@ -129,7 +156,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                             : 'Time Entry の基本情報を入力して作成を押してください。'}
                     </p>
 
-                    {/* ✅ タイトル（CSS統一版） */}
+                    {/* ✅ タイトル */}
                     <label className="modal-label">タイトル</label>
                     <div className="modal-select full-width">
                         <input
@@ -295,11 +322,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                 {/* フッター */}
                 <div className="modal-footer">
                     <div className="footer-right">
-                        {/* {selectedEvent && (
-                            <button className="btn-delete" onClick={handleDelete}>
-                                削除
-                            </button>
-                        )} */}
                         <button className="btn-cancel" onClick={onClose}>
                             キャンセル
                         </button>

@@ -123,15 +123,32 @@ function App() {
 
   // ========= 日付クリック（新規作成） ========= //
   const handleDateClick = (range: { start: Date; end: Date }) => {
-    setSelectedEvent(null); // ★新規モードにする
+    setSelectedEvent(null);
     setSelectedDateTime(range);
     setIsModalOpen(true);
   };
 
   // ========= イベントクリック（編集） ========= //
   const handleEventClick = (eventData: any) => {
-    setSelectedEvent(eventData); // ★編集モードにする
+    setSelectedEvent(eventData);
     setSelectedDateTime(null);
+    setIsModalOpen(true);
+  };
+
+  // ========= 新しいタイムエントリ作成（現在時刻を30分単位に丸め） ========= //
+  const handleOpenNewEntry = () => {
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const roundedMinutes = minutes < 30 ? 0 : 30;
+
+    const start = new Date(now);
+    start.setMinutes(roundedMinutes, 0, 0);
+
+    const end = new Date(start);
+    end.setHours(end.getHours() + 1);
+
+    setSelectedEvent(null);
+    setSelectedDateTime({ start, end });
     setIsModalOpen(true);
   };
 
@@ -144,10 +161,14 @@ function App() {
         : [...prev, data];
     });
 
-    // ✅ 閉じるときに状態をクリア
+    // ✅ モーダルを閉じる（状態リセットは後で）
     setIsModalOpen(false);
-    setSelectedEvent(null);
-    setSelectedDateTime(null);
+
+    // 🔽 遅延して selectedEvent / selectedDateTime をリセット（fade-out 終了後）
+    setTimeout(() => {
+      setSelectedEvent(null);
+      setSelectedDateTime(null);
+    }, 300);
   };
 
   return (
@@ -163,7 +184,7 @@ function App() {
             onNext={handleNext}
             onToday={handleToday}
             currentDate={currentDate}
-            onOpenNewEntry={() => handleDateClick({ start: new Date(), end: new Date(new Date().getTime() + 60 * 60 * 1000) })}
+            onOpenNewEntry={handleOpenNewEntry}
           />
 
           <div className="content-body">
@@ -192,8 +213,11 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          setSelectedEvent(null); // ★閉じるときにリセット
-          setSelectedDateTime(null);
+          // 🔽 アニメーション終了後に状態リセット（300ms後）
+          setTimeout(() => {
+            setSelectedEvent(null);
+            setSelectedDateTime(null);
+          }, 300);
         }}
         onSubmit={handleModalSubmit}
         selectedDateTime={selectedDateTime}
