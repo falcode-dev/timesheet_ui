@@ -18,10 +18,14 @@ export const ContentHeader: React.FC<ContentHeaderProps> = ({
     onPrev,
     onNext,
     onToday,
-    currentDate,
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const todayStr = currentDate.toISOString().split('T')[0].replace(/-/g, '/');
+
+    // ✅ 常に今日の日付を表示（固定）
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(
+        today.getDate()
+    ).padStart(2, '0')}`;
 
     const handleCreateEntry = (data: any) => {
         console.log('作成データ:', data);
@@ -48,7 +52,7 @@ export const ContentHeader: React.FC<ContentHeaderProps> = ({
                         </button>
                     </div>
 
-                    {/* ✅ モーダル起動ボタン */}
+                    {/* 新しいタイムエントリボタン */}
                     <button
                         className="add-entry-button"
                         onClick={() => setIsModalOpen(true)}
@@ -69,14 +73,15 @@ export const ContentHeader: React.FC<ContentHeaderProps> = ({
                         {'<'}
                     </button>
 
+                    <button className="arrow-button" onClick={onNext}>
+                        {'>'}
+                    </button>
+
+                    {/* ✅ 検索欄風の日付表示 */}
                     <div className="date-display">
                         {todayStr}
                         <FaIcons.FaRegCalendarAlt className="date-icon" />
                     </div>
-
-                    <button className="arrow-button" onClick={onNext}>
-                        {'>'}
-                    </button>
 
                     <div className="view-tabs">
                         {['1日', '3日', '週'].map((v) => (
@@ -92,7 +97,7 @@ export const ContentHeader: React.FC<ContentHeaderProps> = ({
                 </div>
             </div>
 
-            {/* ✅ モーダルコンポーネント */}
+            {/* モーダル */}
             <TimeEntryModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

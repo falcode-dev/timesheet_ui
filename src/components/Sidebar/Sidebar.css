@@ -19,6 +19,8 @@
 .sidebar-title {
     color: var(--main-color);
     margin-bottom: 8px;
+    font-size: 16px;
+    margin: 0;
 }
 
 .sidebar-radios label {
