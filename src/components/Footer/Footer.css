@@ -3,18 +3,22 @@
     justify-content: flex-start;
     align-items: center;
     padding: 12px 24px;
-    background-color: #F0F0F0;
+    background-color: #f0f0f0;
     border-top: 1px solid #ddd;
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-    /* ← 上に影を追加 */
+    flex-wrap: wrap;
+    /* ✅ 狭い画面では全体が折り返せるように */
+    gap: 10px;
 }
 
+/* 右側ボタン群 */
 .footer-right {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
-/* フッターボタン（アップロードボタンと同デザイン） */
+/* ===== フッターボタン ===== */
 .footer-button {
     height: 38px;
     padding: 0 16px;
@@ -22,13 +26,18 @@
     color: rgb(0, 137, 186);
     border: 1px solid rgb(0, 137, 186);
     border-radius: 4px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: 0.2s;
+    transition: 0.25s ease;
+    white-space: nowrap;
+    /* ✅ 改行防止 */
+    min-width: 140px;
+    /* ✅ 押しつぶし防止（文字が長い時も安定） */
+    box-sizing: border-box;
 }
 
 .footer-button:hover {
@@ -36,7 +45,43 @@
     color: white;
 }
 
+/* アイコン */
 .footer-icon {
     font-size: 1rem;
     font-weight: bold;
+}
+
+/* ===== レスポンシブ対応 ===== */
+@media (max-width: 768px) {
+    .footer-container {
+        justify-content: center;
+        padding: 10px 16px;
+        gap: 8px;
+    }
+
+    .footer-right {
+        justify-content: center;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .footer-button {
+        flex: 1;
+        min-width: unset;
+        /* ✅ 幅制約を解除して均等配置 */
+        max-width: 100%;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-button {
+        font-size: 0.9rem;
+        padding: 0 12px;
+        height: 36px;
+    }
+
+    .footer-icon {
+        font-size: 0.9rem;
+    }
 }
