@@ -49,34 +49,36 @@ function App() {
       <Header workOrders={workOrders} selectedWO={selectedWO} setSelectedWO={setSelectedWO} />
 
       <main className="main-layout">
-        <ContentHeader
-          calendarView={calendarView}
-          onCalendarViewChange={setCalendarView}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onToday={handleToday}
-          currentDate={currentDate}
-          onOpenNewEntry={openNewEntry}
-        />
+        <div className="content-wrapper">
+          <ContentHeader
+            calendarView={calendarView}
+            onCalendarViewChange={setCalendarView}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onToday={handleToday}
+            currentDate={currentDate}
+            onOpenNewEntry={openNewEntry}
+          />
 
-        <div className="content-body">
-          <Sidebar />
-          <div className="main-calendar">
-            <CalendarView
-              viewMode={calendarView}
-              currentDate={currentDate}
-              onDateChange={setCurrentDate}
-              onDateClick={handleDateClick}
-              onEventClick={handleEventClick}
-              events={[...dataverseEvents, ...events]} // ✅ Dataverse＋ローカル登録両方
-            />
+          <div className="content-body">
+            <Sidebar />
+            <div className="main-calendar">
+              <CalendarView
+                viewMode={calendarView}
+                currentDate={currentDate}
+                onDateChange={setCurrentDate}
+                onDateClick={handleDateClick}
+                onEventClick={handleEventClick}
+                events={[...dataverseEvents, ...events]} // ✅ Dataverse＋ローカル登録両方
+              />
+            </div>
           </div>
-        </div>
 
-        <Footer
-          onOpenFavoriteModal={() => setIsFavoriteModalOpen(true)}
-          onOpenUserListModal={() => setIsUserListModalOpen(true)}
-        />
+          <Footer
+            onOpenFavoriteModal={() => setIsFavoriteModalOpen(true)}
+            onOpenUserListModal={() => setIsUserListModalOpen(true)}
+          />
+        </div>
       </main>
 
       <TimeEntryModal
