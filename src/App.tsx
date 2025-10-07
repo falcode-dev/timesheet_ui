@@ -27,6 +27,10 @@ function App() {
   // ✅ Dataverse情報（画面表示用）
   const [dataverseInfo, setDataverseInfo] = useState<string>('読み込み中...');
 
+  // ✅ proto_test1 リスト（対象WO選択用）
+  const [workOrders, setWorkOrders] = useState<{ id: string; name: string }[]>([]);
+  const [selectedWO, setSelectedWO] = useState<string>('');
+
   // ✅ 共通：Dataverse Xrm 参照を安全に取得
   const getXrm = (): any | null => {
     if ((window as any).Xrm) return (window as any).Xrm;
@@ -34,29 +38,53 @@ function App() {
     return null;
   };
 
-  // ========= ✅ Dataverse ユーザー情報の取得 ========= //
+  // ========= ✅ Dataverse ユーザー情報 & proto_test1 取得 ========= //
   useEffect(() => {
     const xrm = getXrm();
-
-    if (xrm) {
-      try {
-        const globalCtx = xrm.Utility.getGlobalContext();
-        const user = globalCtx.userSettings;
-
-        let info = `✅ Dataverse 環境情報\n`;
-        info += `環境URL: ${globalCtx.getClientUrl()}\n`;
-        info += `ユーザー名: ${user.userName}\n`;
-        info += `ユーザーID: ${user.userId}\n`;
-        info += `事業単位: ${user.businessUnitId}\n`;
-        info += `セキュリティロール: ${user.securityRoles.join(', ')}\n`;
-
-        setDataverseInfo(info);
-      } catch (err) {
-        setDataverseInfo('⚠️ Xrm オブジェクトの読み取りに失敗しました。');
-        console.warn('Xrm 読み取りエラー:', err);
-      }
-    } else {
+    if (!xrm) {
       setDataverseInfo('⚠️ Dataverse 環境外です（ローカル or 通常のWeb実行環境）。');
+      return;
+    }
+
+    try {
+      const globalCtx = xrm.Utility.getGlobalContext();
+      const user = globalCtx.userSettings;
+      const userId = user.userId.replace(/[{}]/g, '');
+
+      let info = `✅ Dataverse 環境情報\n`;
+      info += `環境URL: ${globalCtx.getClientUrl()}\n`;
+      info += `ユーザー名: ${user.userName}\n`;
+      info += `ユーザーID: ${user.userId}\n`;
+
+      setDataverseInfo(info);
+
+      // ✅ proto_test1 データ取得（作成者 = ユーザーID）
+      const entityName = 'proto_test1s';
+      const query = `?$select=proto_test1id,proto_name&$filter=_createdby_value eq ${userId}`;
+
+      console.log('🧩 Dataverse Fetch Query:', query);
+
+      xrm.WebApi.retrieveMultipleRecords(entityName, query)
+        .then((result: any) => {
+          console.log('✅ proto_test1 データ取得成功:', result);
+
+          const woList = result.entities.map((item: any) => ({
+            id: item.proto_test1id,
+            name: item.proto_name || '(名称未設定)',
+          }));
+
+          setWorkOrders(woList);
+
+          setDataverseInfo((prev) =>
+            prev + `\n✅ proto_test1: ${woList.length} 件取得`
+          );
+        })
+        .catch((error: any) => {
+          console.error('❌ proto_test1 データ取得失敗:', error);
+          setDataverseInfo('❌ proto_test1 データの取得に失敗しました。詳細はコンソールを確認してください。');
+        });
+    } catch (err) {
+      console.error('⚠️ Dataverse 処理エラー:', err);
     }
   }, []);
 
@@ -80,7 +108,7 @@ function App() {
 
       xrm.WebApi.retrieveMultipleRecords(entityName, query)
         .then((result: any) => {
-          console.log('✅ proto_test1 データ取得成功:', result);
+          console.log('✅ proto_test2 データ取得成功:', result);
 
           const formattedEvents = result.entities.flatMap((p: any) =>
             (p[navigationName] || []).map((child: any) => ({
@@ -94,12 +122,12 @@ function App() {
           setEvents(formattedEvents);
 
           setDataverseInfo((prev) =>
-            prev + `\n\n✅ 取得件数: ${formattedEvents.length} 件のイベントを読み込みました。`
+            prev + `\n✅ proto_test2: ${formattedEvents.length} 件のイベントを読み込みました。`
           );
         })
         .catch((error: any) => {
           console.error('❌ Dataverse データ取得失敗:', error);
-          setDataverseInfo('❌ proto_test1/proto_test2 データの取得に失敗しました。詳細はコンソールを確認してください。');
+          setDataverseInfo('❌ proto_test2 データの取得に失敗しました。');
         });
     } catch (err) {
       console.error('⚠️ Dataverse クエリ実行時エラー:', err);
@@ -135,7 +163,7 @@ function App() {
     setIsModalOpen(true);
   };
 
-  // ========= 新しいタイムエントリ作成（現在時刻を30分単位に丸め） ========= //
+  // ========= 新しいタイムエントリ作成 ========= //
   const handleOpenNewEntry = () => {
     const now = new Date();
     const minutes = now.getMinutes();
@@ -156,15 +184,9 @@ function App() {
   const handleModalSubmit = (data: any) => {
     setEvents((prev) => {
       const exists = prev.find((e) => e.id === data.id);
-      return exists
-        ? prev.map((e) => (e.id === data.id ? data : e))
-        : [...prev, data];
+      return exists ? prev.map((e) => (e.id === data.id ? data : e)) : [...prev, data];
     });
-
-    // ✅ モーダルを閉じる（状態リセットは後で）
     setIsModalOpen(false);
-
-    // 🔽 遅延して selectedEvent / selectedDateTime をリセット（fade-out 終了後）
     setTimeout(() => {
       setSelectedEvent(null);
       setSelectedDateTime(null);
@@ -173,7 +195,12 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header />
+      {/* ✅ Header に Dataverse の proto_test1 選択情報を渡す */}
+      <Header
+        workOrders={workOrders}
+        selectedWO={selectedWO}
+        setSelectedWO={setSelectedWO}
+      />
 
       <main className="main-layout">
         <div className="content-wrapper">
@@ -213,7 +240,6 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          // 🔽 アニメーション終了後に状態リセット（300ms後）
           setTimeout(() => {
             setSelectedEvent(null);
             setSelectedDateTime(null);
@@ -224,18 +250,18 @@ function App() {
         selectedEvent={selectedEvent}
       />
 
-      {/* ✅ お気に入り間接タスクモーダル */}
+      {/* ✅ お気に入りタスクモーダル */}
       <FavoriteTaskModal
         isOpen={isFavoriteModalOpen}
         onClose={() => setIsFavoriteModalOpen(false)}
-        onSave={(tasks) => setIsFavoriteModalOpen(false)}
+        onSave={() => setIsFavoriteModalOpen(false)}
       />
 
-      {/* ✅ ユーザー一覧設定モーダル */}
+      {/* ✅ ユーザー一覧モーダル */}
       <UserListModal
         isOpen={isUserListModalOpen}
         onClose={() => setIsUserListModalOpen(false)}
-        onSave={(users) => setIsUserListModalOpen(false)}
+        onSave={() => setIsUserListModalOpen(false)}
       />
     </div>
   );

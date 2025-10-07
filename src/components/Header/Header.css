@@ -1,14 +1,13 @@
+/* ======================
+   ヘッダー全体
+====================== */
 .header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 24px;
-    /* background-color: #fff; */
-    font-weight: bold;
-    /* border-bottom: 1px solid #ddd; */
-    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
     flex-wrap: wrap;
-    /* ← 小画面時に折り返せるように */
+    font-weight: bold;
 }
 
 .header-left .header-title {
@@ -20,7 +19,8 @@
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+    /* ← 間隔を少し広げて重なり回避 */
     flex-wrap: wrap;
 }
 
@@ -29,54 +29,146 @@
     font-weight: bold;
 }
 
-/* ===== 検索欄 ===== */
+/* ======================
+   対象WOセレクト（全体）
+====================== */
+.header-select-wrapper {
+    position: relative;
+    width: 260px;
+}
+
+/* ▼ 閉じている状態 */
 .header-search {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: white;
-    padding: 0 10px;
-    height: 30px;
-    /* 高さ統一 */
-    width: 450px;
-    /* 横幅を少し広めに */
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    transition: 0.2s ease;
+    cursor: pointer;
     box-sizing: border-box;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.header-input {
-    border: none;
-    outline: none;
-    font-weight: bold;
-    color: #555;
-    background-color: transparent;
+/* .header-search:hover {
+    border-color: rgb(0, 137, 186);
+    box-shadow: 0 0 0 2px rgba(0, 137, 186, 0.15);
+} */
+
+.header-select-wrapper.open .header-search {
+    border-color: rgb(0, 137, 186);
+    box-shadow: 0 0 0 2px rgba(0, 137, 186, 0.15);
+}
+
+/* ▼ テキスト */
+.header-input-text {
     flex: 1;
-    height: 100%;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.header-input::placeholder {
-    color: #888;
-    opacity: 1;
+.header-input-text.placeholder {
+    color: #999;
+    /* font-style: italic; */
 }
 
-/* ▼ アイコン部分 */
+/* ▼ アイコン */
 .header-icon {
-    color: #555;
-    font-size: 0.85rem;
-    margin-left: 6px;
+    font-size: 0.9rem;
+    color: rgb(0, 137, 186);
+    transition: transform 0.25s ease;
     pointer-events: none;
 }
 
-/* ===== ボタン ===== */
+.header-select-wrapper.open .header-icon {
+    transform: rotate(180deg);
+}
+
+/* ======================
+   optionリスト（ドロップダウン）
+====================== */
+.header-option-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    /* ← 少し下げてボタンとの重なりを解消 */
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    z-index: 20;
+    /* ← ボタンより前面に表示 */
+    overflow-y: auto;
+    max-height: 240px;
+    animation: dropdown-fade 0.15s ease-out;
+}
+
+@keyframes dropdown-fade {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ▼ 各オプション */
+.header-option {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+/* ✅ hover色を削除（シンプルに） */
+/* .header-option:hover { background-color: #eaf6fb; } */
+
+.header-option.selected {
+    background-color: #e0f2f9;
+    color: rgb(0, 137, 186);
+    font-weight: bold;
+}
+
+.header-option.empty {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 10px 0;
+}
+
+/* ▼ スクロールバーも見た目調整 */
+.header-option-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.header-option-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+/* ======================
+   アップロードボタン
+====================== */
 .upload-button {
-    height: 30px;
-    /* 検索欄と高さ統一 */
+    height: 36px;
     padding: 0 14px;
     background-color: white;
     color: rgb(0, 137, 186);
     border: 1px solid rgb(0, 137, 186);
-    border-radius: 4px;
+    border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
@@ -86,6 +178,9 @@
     gap: 6px;
     box-sizing: border-box;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
+    /* ← ドロップダウンと重なっても手前に来ないように */
 }
 
 .upload-button:hover {
@@ -93,33 +188,30 @@
     color: white;
 }
 
-/* アイコン */
 .upload-icon {
     font-size: 0.9rem;
 }
 
-/* ========== ▼ レスポンシブ対応 ▼ ========== */
-
-/* タブレット（中間幅） */
+/* ======================
+   レスポンシブ対応
+====================== */
 @media (max-width: 899px) {
     .header-container {
         padding: 10px 16px;
     }
 
-    .header-right {
-        gap: 10px;
-    }
-
     .header-title {
         font-size: 1.1rem;
     }
+
+    .header-select-wrapper {
+        width: 220px;
+    }
 }
 
-/* スマホ（縦配置） */
 @media (max-width: 599px) {
     .header-container {
         flex-direction: column;
-        /* ← タイトルと操作群を縦並びに */
         align-items: flex-start;
         gap: 8px;
     }
@@ -135,8 +227,8 @@
         flex-basis: 100%;
     }
 
-    .header-search {
-        flex: 1;
+    .header-select-wrapper {
+        width: 100%;
         min-width: 180px;
     }
 
