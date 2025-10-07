@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as FaIcons from 'react-icons/fa';
+import { getXrm } from '../../utils/xrmUtils'; // ✅ Dataverseユーティリティ
 import './TimeEntryModal.css';
 
 interface ProtoItem {
@@ -14,6 +15,7 @@ interface TimeEntryModalProps {
     onDelete?: (id: string) => void;
     selectedDateTime?: { start: Date; end: Date } | null;
     selectedEvent?: any | null;
+    workOrders?: ProtoItem[]; // ✅ Appから渡す
 }
 
 export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
@@ -23,6 +25,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     onDelete,
     selectedDateTime,
     selectedEvent,
+    workOrders = [], // ✅ デフォルト空配列
 }) => {
     const [isMounted, setIsMounted] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
@@ -38,45 +41,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     const [endHour, setEndHour] = useState('');
     const [endMinute, setEndMinute] = useState('');
 
-    const startDateRef = useRef<HTMLInputElement>(null);
-    const endDateRef = useRef<HTMLInputElement>(null);
-
-    // ========================
-    // ▼ proto_test1 から WO データを取得
-    // ========================
-    const [workOrders, setWorkOrders] = useState<ProtoItem[]>([]);
-    const [loadingWO, setLoadingWO] = useState(false);
-
-    useEffect(() => {
-        if (!isOpen) return;
-        const fetchWO = async () => {
-            try {
-                setLoadingWO(true);
-                const res = await fetch('/api/proto_test1');
-                if (!res.ok) throw new Error('データ取得に失敗しました');
-                const data: ProtoItem[] = await res.json();
-                setWorkOrders(data);
-            } catch (err) {
-                console.error('proto_test1 fetch error:', err);
-            } finally {
-                setLoadingWO(false);
-            }
-        };
-        fetchWO();
-    }, [isOpen]);
-
-    // ========================
-    // ▼ 他の固定セレクト
-    // ========================
-    const endUsers = ['株式会社サンプル', 'ABC商事', 'XYZソリューション'];
-    const locations = ['東京', '大阪', '名古屋'];
-    const timeCategories = ['通常勤務', '残業', '休日出勤'];
-    const categories = ['開発', '会議', 'レビュー'];
-    const tasks = ['資料作成', 'プログラミング', 'テスト'];
-
-    // ========================
-    // ▼ 選択状態
-    // ========================
     const [selectedWO, setSelectedWO] = useState('');
     const [selectedEndUser, setSelectedEndUser] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
@@ -86,69 +50,47 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
 
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const startDateRef = useRef<HTMLInputElement>(null);
+    const endDateRef = useRef<HTMLInputElement>(null);
+
+    const endUsers = ['株式会社サンプル', 'ABC商事', 'XYZソリューション'];
+    const locations = ['東京', '大阪', '名古屋'];
+    const timeCategories = ['通常勤務', '残業', '休日出勤'];
+    const categories = ['開発', '会議', 'レビュー'];
+    const tasks = ['資料作成', 'プログラミング', 'テスト'];
 
     // ========================
-    // ▼ 外部クリックで閉じる（全セレクト対応）
+    // ▼ 外部クリックで閉じる処理
     // ========================
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // 開いている場合のみ判定する
             if (!openMenu) return;
-
-            // クリック対象が「現在開いているセレクトボックス」内か確認
             const openSelect = document.querySelector(`.modal-select.open`);
-            if (openSelect && openSelect.contains(event.target as Node)) {
-                return; // → 内側クリックなので閉じない
-            }
-
-            // 外側クリック → 閉じる
+            if (openSelect && openSelect.contains(event.target as Node)) return;
             setOpenMenu(null);
         };
-
-        if (openMenu) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        // ✅ クリーンアップ
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        if (openMenu) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [openMenu]);
 
-    // ========================
-    // ▼ メニュー開閉処理（HeaderSearchと同じ）
-    // ========================
     const toggleMenu = (key: string) => {
         setOpenMenu((prev) => (prev === key ? null : key));
     };
 
-
     const handleSelect = (key: string, value: string) => {
         switch (key) {
-            case 'wo':
-                setSelectedWO(value);
-                break;
-            case 'endUser':
-                setSelectedEndUser(value);
-                break;
-            case 'location':
-                setSelectedLocation(value);
-                break;
-            case 'timeCategory':
-                setSelectedTimeCategory(value);
-                break;
-            case 'category':
-                setSelectedCategory(value);
-                break;
-            case 'task':
-                setSelectedTask(value);
-                break;
+            case 'wo': setSelectedWO(value); break;
+            case 'endUser': setSelectedEndUser(value); break;
+            case 'location': setSelectedLocation(value); break;
+            case 'timeCategory': setSelectedTimeCategory(value); break;
+            case 'category': setSelectedCategory(value); break;
+            case 'task': setSelectedTask(value); break;
         }
         setOpenMenu(null);
     };
 
     // ========================
-    // ▼ 日付フォーマット＆初期化
+    // ▼ 初期値設定
     // ========================
     const formatLocalDate = (date: Date) => {
         const y = date.getFullYear();
@@ -181,22 +123,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
             setEndDate(formatLocalDate(end));
             setEndHour(end.getHours().toString().padStart(2, '0'));
             setEndMinute(end.getMinutes().toString().padStart(2, '0'));
-        } else {
-            const now = new Date();
-            const minutes = now.getMinutes();
-            const roundedMinutes = minutes < 30 ? 0 : 30;
-            const roundedStart = new Date(now);
-            roundedStart.setMinutes(roundedMinutes, 0, 0);
-            const roundedEnd = new Date(roundedStart);
-            roundedEnd.setHours(roundedEnd.getHours() + 1);
-            setTitle('');
-            setComment('');
-            setStartDate(formatLocalDate(roundedStart));
-            setStartHour(roundedStart.getHours().toString().padStart(2, '0'));
-            setStartMinute(roundedStart.getMinutes().toString().padStart(2, '0'));
-            setEndDate(formatLocalDate(roundedEnd));
-            setEndHour(roundedEnd.getHours().toString().padStart(2, '0'));
-            setEndMinute(roundedEnd.getMinutes().toString().padStart(2, '0'));
         }
     }, [isOpen, selectedEvent, selectedDateTime]);
 
@@ -217,34 +143,56 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
 
     if (!isMounted) return null;
 
-    const handleSave = () => {
+    // ========================
+    // ▼ Dataverse 登録処理
+    // ========================
+    const handleSave = async () => {
         const start = new Date(`${startDate}T${startHour}:${startMinute}`);
         const end = new Date(`${endDate}T${endHour}:${endMinute}`);
-        const data = {
-            id: selectedEvent?.id || Date.now().toString(),
-            title: title || '無題のイベント',
-            start,
-            end,
-            extendedProps: {
-                comment,
-                selectedWO,
-                selectedEndUser,
-                selectedLocation,
-                selectedTimeCategory,
-                selectedCategory,
-                selectedTask,
-            },
-        };
-        onSubmit(data);
-        onClose();
-    };
+        const xrm = getXrm();
 
-    const handleDelete = () => {
-        if (selectedEvent && onDelete) {
-            if (window.confirm(`「${selectedEvent.title}」を削除しますか？`)) {
-                onDelete(selectedEvent.id);
-                onClose();
-            }
+        if (!xrm) {
+            alert('⚠️ Dataverse 環境外のため登録できません。');
+            onClose();
+            return;
+        }
+
+        const entityName = 'proto_timeentry';
+        const record: any = {
+            proto_name: title || '無題のイベント',
+            proto_startdatetime: start.toISOString(),
+            proto_enddatetime: end.toISOString(),
+            // proto_comment: comment || '',
+            // proto_enduser: selectedEndUser,
+            // proto_location: selectedLocation,
+            // proto_timecategory: selectedTimeCategory,
+            // proto_category: selectedCategory,
+            // proto_task: selectedTask,
+        };
+
+        // ✅ WorkOrderとの関連付け（lookup）
+        if (selectedWO) {
+            const wo = workOrders.find((w) => w.name === selectedWO);
+            if (wo) record['proto_wonumber@odata.bind'] = `/proto_workorders(${wo.id})`;
+        }
+
+        try {
+            const result = await xrm.WebApi.createRecord(entityName, record);
+            console.log('✅ Dataverse登録成功:', result);
+
+            onSubmit({
+                id: result.id,
+                title: record.proto_name,
+                start,
+                end,
+                extendedProps: record,
+            });
+
+            alert('✅ Dataverse に登録しました。');
+            onClose();
+        } catch (error) {
+            console.error('❌ Dataverse 登録失敗:', error);
+            alert('❌ 登録に失敗しました。詳細はコンソールを確認してください。');
         }
     };
 
@@ -254,37 +202,33 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
     return (
         <div className={`modal-overlay ${isVisible ? 'fade-in' : 'fade-out'}`}>
             <div ref={menuRef} className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
-                {/* ヘッダー */}
                 <div className="modal-header">
                     <h3 className="modal-title">
-                        {selectedEvent ? 'タイムエントリをを編集' : '新しいタイムエントリを作成'}
+                        {selectedEvent ? 'タイムエントリを編集' : '新しいタイムエントリを作成'}
                     </h3>
                 </div>
 
-                {/* 本文 */}
                 <div className="modal-body">
                     <p className="modal-description">
-                        {selectedEvent
-                            ? 'Time Entry の基本情報を入力して更新を押してください。'
-                            : 'Time Entry の基本情報を入力して作成を押してください。'}
+                        {selectedEvent ? '更新後、保存を押してください。' : '必要な情報を入力して作成を押してください。'}
                     </p>
 
                     {/* タイトル */}
-                    {/* <label className="modal-label">タイトル</label>
+                    <label className="modal-label">タイトル</label>
                     <input
                         type="text"
                         className="form-control"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="タイトルを入力"
-                    /> */}
+                    />
 
-                    {/* ✅ WO番号（proto_test1から取得） */}
+                    {/* ✅ WO番号選択 */}
                     <label className="modal-label">WO番号</label>
                     <div className={`modal-select ${openMenu === 'wo' ? 'open' : ''}`}>
                         <div className="modal-select-display" onClick={() => toggleMenu('wo')}>
                             <span className={`modal-select-text ${!selectedWO ? 'placeholder' : ''}`}>
-                                {selectedWO || (loadingWO ? '読み込み中...' : 'WOを選択')}
+                                {selectedWO || 'WOを選択'}
                             </span>
                             <FaIcons.FaChevronDown className="icon" />
                         </div>
@@ -544,14 +488,8 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({
                     </div>
                 </div>
 
-                {/* フッター */}
                 <div className="modal-footer">
                     <div className="footer-right">
-                        {/* {selectedEvent && (
-                            <button className="btn-cancel" onClick={handleDelete}>
-                                削除
-                            </button>
-                        )} */}
                         <button className="btn-cancel" onClick={onClose}>
                             キャンセル
                         </button>

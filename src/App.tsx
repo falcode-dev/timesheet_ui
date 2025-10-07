@@ -87,6 +87,7 @@ function App() {
         onSubmit={handleModalSubmit}
         selectedDateTime={selectedDateTime}
         selectedEvent={selectedEvent}
+        workOrders={workOrders} // ✅ Dataverseで取得したWOを渡す
       />
 
       <FavoriteTaskModal
