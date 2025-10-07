@@ -59,8 +59,8 @@ function App() {
       setDataverseInfo(info);
 
       // ✅ proto_test1 データ取得（作成者 = ユーザーID）
-      const entityName = 'proto_test1s';
-      const query = `?$select=proto_test1id,proto_name&$filter=_createdby_value eq ${userId}`;
+      const entityName = 'proto_workorder';
+      const query = `?$select=proto_workorderid,proto_wonumber&$filter=_createdby_value eq ${userId}`;
 
       console.log('🧩 Dataverse Fetch Query:', query);
 
@@ -69,8 +69,8 @@ function App() {
           console.log('✅ proto_test1 データ取得成功:', result);
 
           const woList = result.entities.map((item: any) => ({
-            id: item.proto_test1id,
-            name: item.proto_name || '(名称未設定)',
+            id: item.proto_workorderid,
+            name: item.proto_wonumber || '(名称未設定)',
           }));
 
           setWorkOrders(woList);
