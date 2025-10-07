@@ -39,7 +39,6 @@
     transform: translateY(-20px);
     opacity: 0;
     transition: all 0.3s ease;
-    /* ✅ スクロールバーを非表示にする */
     scrollbar-width: none;
     /* Firefox */
     -ms-overflow-style: none;
@@ -48,7 +47,6 @@
 
 .modal-content::-webkit-scrollbar {
     display: none;
-    /* Chrome / Safari */
 }
 
 .modal-content.fade-in {
@@ -94,7 +92,7 @@
     margin-bottom: 6px;
 }
 
-/* ====== 共通入力デザイン（input・textarea・select統一） ====== */
+/* ====== 共通入力デザイン ====== */
 .form-control,
 .modal-select input,
 .date-input input,
@@ -129,22 +127,106 @@ textarea {
     min-height: 80px;
 }
 
-/* ====== 共通選択入力 ====== */
+/* ====== カスタムセレクト（WO番号） ====== */
 .modal-select {
     position: relative;
-    display: inline-flex;
-    align-items: center;
     width: 100%;
+}
+
+.modal-select-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: #fff;
+    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06); */
+    cursor: pointer;
+    transition: 0.2s;
+    box-sizing: border-box;
+}
+
+.modal-select.open .modal-select-display {
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 2px rgba(0, 137, 186, 0.15);
+}
+
+.modal-select-text {
+    flex: 1;
+    font-size: 14px;
+    /* font-weight: bold; */
+    color: #333;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.modal-select-text.placeholder {
+    color: #999;
+    /* font-style: italic; */
 }
 
 .modal-select .icon {
-    position: absolute;
-    right: 10px;
     color: var(--main-color);
+    transition: transform 0.25s ease;
+    pointer-events: none;
 }
 
-.modal-select.full-width {
+.modal-select.open .icon {
+    transform: rotate(180deg);
+}
+
+/* ▼ ドロップダウンリスト */
+.modal-option-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
     width: 100%;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 20;
+    animation: dropdown-fade 0.15s ease-out;
+}
+
+@keyframes dropdown-fade {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-option {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+}
+
+.modal-option.selected {
+    background-color: #e0f2f9;
+    color: var(--main-color);
+    font-weight: bold;
+}
+
+/* スクロールバー調整 */
+.modal-option-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-option-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
 }
 
 /* ====== 日付・時間 ====== */
@@ -171,22 +253,12 @@ textarea {
     color: var(--main-color);
 }
 
-.date-input {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
 .date-input input[type="date"] {
     width: 100%;
     padding-right: 30px;
-    /* アイコンスペース */
 }
 
 .date-input .icon {
-    position: absolute;
-    right: 8px;
-    color: var(--main-color);
     cursor: pointer;
     font-size: 1rem;
     transition: opacity 0.2s ease;
@@ -196,24 +268,12 @@ textarea {
     opacity: 0.7;
 }
 
-/* Chrome, Safari, Edge 用 */
+/* Chrome, Safari, Edge */
 input[type="date"]::-webkit-calendar-picker-indicator {
     display: none;
-    -webkit-appearance: none;
 }
 
-/* Firefox 用（現状、表示されないが安全のため） */
-input[type="date"]::-moz-calendar-picker-indicator {
-    display: none;
-}
-
-/* Edge 旧版（IEモード）対策 */
-input[type="date"]::-ms-clear,
-input[type="date"]::-ms-expand {
-    display: none;
-}
-
-/* ====== EndUser（結合） ====== */
+/* ====== EndUser ====== */
 .enduser-combined {
     display: flex;
     align-items: center;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as FaIcons from 'react-icons/fa';
-import './FavoriteTaskModal.css'; // ✅ デザイン統一CSSを再利用
+import './FavoriteTaskModal.css'; // ✅ 共通デザインを利用
 
 interface UserListModalProps {
     isOpen: boolean;
@@ -15,20 +15,50 @@ export const UserListModal: React.FC<UserListModalProps> = ({
 }) => {
     const [isMounted, setIsMounted] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+
     const [employeeNumber, setEmployeeNumber] = useState('');
     const [userName, setUserName] = useState('');
-    const [searchResults, setSearchResults] = useState<string[]>([
-        '田中 太郎',
-        '佐藤 花子',
-        '鈴木 次郎',
-        '高橋 美咲',
-        '山本 健',
-    ]);
+
+    // ▼ 仮データ
+    const employeeNumbers = ['1001', '1002', '1003', '1004', '1005'];
+    const users = ['田中 太郎', '佐藤 花子', '鈴木 次郎', '高橋 美咲', '山本 健'];
+
+    const [searchResults, setSearchResults] = useState<string[]>(users);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [checkedResults, setCheckedResults] = useState<string[]>([]);
     const [checkedSelected, setCheckedSelected] = useState<string[]>([]);
 
-    // 🧩 モーダル表示アニメーション
+    // ========================
+    // ▼ セレクト開閉制御
+    // ========================
+    const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+    const toggleMenu = (key: string) => {
+        setOpenMenu((prev) => (prev === key ? null : key));
+    };
+
+    const handleSelect = (key: string, value: string) => {
+        if (key === 'employeeNumber') {
+            setEmployeeNumber(value);
+        } else if (key === 'userName') {
+            setUserName(value);
+        }
+        setOpenMenu(null);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const openSelect = document.querySelector('.modal-select.open');
+            if (openSelect && openSelect.contains(event.target as Node)) return;
+            setOpenMenu(null);
+        };
+        if (openMenu) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenu]);
+
+    // ========================
+    // ▼ モーダルフェードアニメーション
+    // ========================
     useEffect(() => {
         if (isOpen) {
             setIsMounted(true);
@@ -43,14 +73,24 @@ export const UserListModal: React.FC<UserListModalProps> = ({
 
     if (!isMounted) return null;
 
-    // ✅ 検索結果チェック制御
+    // ========================
+    // ▼ 検索・選択系操作
+    // ========================
+    const handleSearch = () => {
+        const filtered = users.filter(
+            (u) =>
+                (!employeeNumber || u.includes(employeeNumber)) &&
+                (!userName || u.includes(userName))
+        );
+        setSearchResults(filtered);
+    };
+
     const toggleCheck = (user: string) => {
         setCheckedResults((prev) =>
             prev.includes(user) ? prev.filter((u) => u !== user) : [...prev, user]
         );
     };
 
-    // ✅ 「＞」で右側へ追加
     const moveToSelected = () => {
         const newSelected = [...selectedUsers];
         checkedResults.forEach((user) => {
@@ -60,25 +100,25 @@ export const UserListModal: React.FC<UserListModalProps> = ({
         setCheckedResults([]);
     };
 
-    // ✅ 右側チェック制御
     const toggleSelectedCheck = (user: string) => {
         setCheckedSelected((prev) =>
             prev.includes(user) ? prev.filter((u) => u !== user) : [...prev, user]
         );
     };
 
-    // ✅ 一括削除
     const removeCheckedSelected = () => {
         setSelectedUsers((prev) => prev.filter((u) => !checkedSelected.includes(u)));
         setCheckedSelected([]);
     };
 
-    // ✅ 単体削除
     const removeUser = (user: string) => {
         setSelectedUsers((prev) => prev.filter((u) => u !== user));
         setCheckedSelected((prev) => prev.filter((u) => u !== user));
     };
 
+    // ========================
+    // ▼ JSX
+    // ========================
     return (
         <div className={`modal-overlay ${isVisible ? 'fade-in' : 'fade-out'}`}>
             <div className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
@@ -90,21 +130,39 @@ export const UserListModal: React.FC<UserListModalProps> = ({
                 {/* 本文 */}
                 <div className="modal-body">
                     <p className="modal-description">
-                        追加したいユーザーを検索し、右側に追加してください。
+                        社員番号またはユーザー名で検索し、右側に追加してください。
                     </p>
 
-                    {/* 検索フォーム */}
+                    {/* 上部検索グリッド */}
                     <div className="modal-grid">
+                        {/* 左：社員番号 */}
                         <div className="grid-left">
                             <label className="modal-label">社員番号</label>
-                            <div className="modal-select">
-                                <input
-                                    type="text"
-                                    placeholder="社員番号を入力"
-                                    value={employeeNumber}
-                                    onChange={(e) => setEmployeeNumber(e.target.value)}
-                                />
-                                <FaIcons.FaChevronDown className="icon" />
+                            <div className={`modal-select ${openMenu === 'employeeNumber' ? 'open' : ''}`}>
+                                <div
+                                    className="modal-select-display"
+                                    onClick={() => toggleMenu('employeeNumber')}
+                                >
+                                    <span
+                                        className={`modal-select-text ${!employeeNumber ? 'placeholder' : ''}`}
+                                    >
+                                        {employeeNumber || '社員番号を選択'}
+                                    </span>
+                                    <FaIcons.FaChevronDown className="icon" />
+                                </div>
+                                {openMenu === 'employeeNumber' && (
+                                    <div className="modal-option-list">
+                                        {employeeNumbers.map((num) => (
+                                            <div
+                                                key={num}
+                                                className={`modal-option ${num === employeeNumber ? 'selected' : ''}`}
+                                                onClick={() => handleSelect('employeeNumber', num)}
+                                            >
+                                                {num}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="right-align">
                                 <button className="btn-clear" onClick={() => setEmployeeNumber('')}>
@@ -113,19 +171,39 @@ export const UserListModal: React.FC<UserListModalProps> = ({
                             </div>
                         </div>
 
+                        {/* 右：ユーザー名 */}
                         <div className="grid-right">
                             <label className="modal-label">ユーザー名</label>
-                            <div className="modal-select">
-                                <input
-                                    type="text"
-                                    placeholder="ユーザー名を入力"
-                                    value={userName}
-                                    onChange={(e) => setUserName(e.target.value)}
-                                />
-                                <FaIcons.FaChevronDown className="icon" />
+                            <div className={`modal-select ${openMenu === 'userName' ? 'open' : ''}`}>
+                                <div
+                                    className="modal-select-display"
+                                    onClick={() => toggleMenu('userName')}
+                                >
+                                    <span
+                                        className={`modal-select-text ${!userName ? 'placeholder' : ''}`}
+                                    >
+                                        {userName || 'ユーザー名を選択'}
+                                    </span>
+                                    <FaIcons.FaChevronDown className="icon" />
+                                </div>
+                                {openMenu === 'userName' && (
+                                    <div className="modal-option-list">
+                                        {users.map((u) => (
+                                            <div
+                                                key={u}
+                                                className={`modal-option ${u === userName ? 'selected' : ''}`}
+                                                onClick={() => handleSelect('userName', u)}
+                                            >
+                                                {u}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="left-align">
-                                <button className="btn-search">検索</button>
+                                <button className="btn-search" onClick={handleSearch}>
+                                    検索
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -174,7 +252,7 @@ export const UserListModal: React.FC<UserListModalProps> = ({
                             </div>
                         </div>
 
-                        {/* 中央移動ボタン */}
+                        {/* 中央：移動ボタン */}
                         <div className="move-button-container">
                             <button className="btn-move" onClick={moveToSelected}>
                                 &gt;

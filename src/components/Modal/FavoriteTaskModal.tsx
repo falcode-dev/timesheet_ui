@@ -15,20 +15,53 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
 }) => {
     const [isMounted, setIsMounted] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+
+    // ========================
+    // ▼ 選択状態
+    // ========================
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedTask, setSelectedTask] = useState('');
-    const [searchResults, setSearchResults] = useState<string[]>([
-        '資料整理',
-        '会議準備',
-        'テスト計画',
-        'レビュー対応',
-        '定例会参加',
-    ]);
+
+    // 選択肢（サンプル）
+    const categories = ['業務改善', '品質向上', '教育・育成'];
+    const tasks = ['資料整理', '会議準備', 'テスト計画', 'レビュー対応', '定例会参加'];
+
+    const [searchResults, setSearchResults] = useState<string[]>(tasks);
     const [favoriteTasks, setFavoriteTasks] = useState<string[]>([]);
     const [checkedResults, setCheckedResults] = useState<string[]>([]);
     const [checkedFavorites, setCheckedFavorites] = useState<string[]>([]);
 
-    // 🧩 フェードアニメーション制御
+    // ========================
+    // ▼ 開閉制御
+    // ========================
+    const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+    const toggleMenu = (key: string) => {
+        setOpenMenu((prev) => (prev === key ? null : key));
+    };
+
+    const handleSelect = (key: string, value: string) => {
+        if (key === 'category') {
+            setSelectedCategory(value);
+        } else if (key === 'task') {
+            setSelectedTask(value);
+        }
+        setOpenMenu(null);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const openSelect = document.querySelector('.modal-select.open');
+            if (openSelect && openSelect.contains(event.target as Node)) return;
+            setOpenMenu(null);
+        };
+        if (openMenu) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenu]);
+
+    // ========================
+    // ▼ フェードアニメーション制御
+    // ========================
     useEffect(() => {
         if (isOpen) {
             setIsMounted(true);
@@ -43,14 +76,15 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
 
     if (!isMounted) return null;
 
-    // ✅ 左リストチェック制御
+    // ========================
+    // ▼ リスト操作
+    // ========================
     const toggleCheck = (task: string) => {
         setCheckedResults((prev) =>
             prev.includes(task) ? prev.filter((t) => t !== task) : [...prev, task]
         );
     };
 
-    // ✅ 「＞」ボタンで右へ移動
     const moveToFavorite = () => {
         const newFavorites = [...favoriteTasks];
         checkedResults.forEach((task) => {
@@ -60,25 +94,25 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
         setCheckedResults([]);
     };
 
-    // ✅ 右リストチェック制御
     const toggleFavoriteCheck = (task: string) => {
         setCheckedFavorites((prev) =>
             prev.includes(task) ? prev.filter((t) => t !== task) : [...prev, task]
         );
     };
 
-    // ✅ 一括削除
     const removeSelectedFavorites = () => {
         setFavoriteTasks((prev) => prev.filter((t) => !checkedFavorites.includes(t)));
         setCheckedFavorites([]);
     };
 
-    // ✅ 単体削除
     const removeFavorite = (task: string) => {
         setFavoriteTasks((prev) => prev.filter((t) => t !== task));
         setCheckedFavorites((prev) => prev.filter((t) => t !== task));
     };
 
+    // ========================
+    // ▼ JSX
+    // ========================
     return (
         <div className={`modal-overlay ${isVisible ? 'fade-in' : 'fade-out'}`}>
             <div className={`modal-content ${isVisible ? 'fade-in' : 'fade-out'}`}>
@@ -98,34 +132,86 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                         {/* 左グリッド */}
                         <div className="grid-left">
                             <label className="modal-label">サブカテゴリ</label>
-                            <div className="modal-select">
-                                <input
-                                    type="text"
-                                    placeholder="サブカテゴリを選択"
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                />
-                                <FaIcons.FaChevronDown className="icon" />
+                            <div className={`modal-select ${openMenu === 'category' ? 'open' : ''}`}>
+                                <div
+                                    className="modal-select-display"
+                                    onClick={() => toggleMenu('category')}
+                                >
+                                    <span
+                                        className={`modal-select-text ${!selectedCategory ? 'placeholder' : ''}`}
+                                    >
+                                        {selectedCategory || 'サブカテゴリを選択'}
+                                    </span>
+                                    <FaIcons.FaChevronDown className="icon" />
+                                </div>
+                                {openMenu === 'category' && (
+                                    <div className="modal-option-list">
+                                        {categories.map((c) => (
+                                            <div
+                                                key={c}
+                                                className={`modal-option ${c === selectedCategory ? 'selected' : ''}`}
+                                                onClick={() => handleSelect('category', c)}
+                                            >
+                                                {c}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="right-align">
-                                <button className="btn-clear">クリア</button>
+                                <button
+                                    className="btn-clear"
+                                    onClick={() => setSelectedCategory('')}
+                                >
+                                    クリア
+                                </button>
                             </div>
                         </div>
 
                         {/* 右グリッド */}
                         <div className="grid-right">
                             <label className="modal-label">タスク名</label>
-                            <div className="modal-select">
-                                <input
-                                    type="text"
-                                    placeholder="タスク名を選択"
-                                    value={selectedTask}
-                                    onChange={(e) => setSelectedTask(e.target.value)}
-                                />
-                                <FaIcons.FaChevronDown className="icon" />
+                            <div className={`modal-select ${openMenu === 'task' ? 'open' : ''}`}>
+                                <div
+                                    className="modal-select-display"
+                                    onClick={() => toggleMenu('task')}
+                                >
+                                    <span
+                                        className={`modal-select-text ${!selectedTask ? 'placeholder' : ''}`}
+                                    >
+                                        {selectedTask || 'タスク名を選択'}
+                                    </span>
+                                    <FaIcons.FaChevronDown className="icon" />
+                                </div>
+                                {openMenu === 'task' && (
+                                    <div className="modal-option-list">
+                                        {tasks.map((t) => (
+                                            <div
+                                                key={t}
+                                                className={`modal-option ${t === selectedTask ? 'selected' : ''}`}
+                                                onClick={() => handleSelect('task', t)}
+                                            >
+                                                {t}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="left-align">
-                                <button className="btn-search">検索</button>
+                                <button
+                                    className="btn-search"
+                                    onClick={() => {
+                                        // 検索条件に応じて絞り込み
+                                        const filtered = tasks.filter(
+                                            (t) =>
+                                                (!selectedCategory || t.includes(selectedCategory)) &&
+                                                (!selectedTask || t.includes(selectedTask))
+                                        );
+                                        setSearchResults(filtered);
+                                    }}
+                                >
+                                    検索
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -170,7 +256,9 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                                                 onChange={() => toggleCheck(task)}
                                             />
                                             <div className="list-text">
-                                                <div className="category-name">業務改善</div>
+                                                <div className="category-name">
+                                                    {selectedCategory || '業務改善'}
+                                                </div>
                                                 <div className="task-name">{task}</div>
                                             </div>
                                         </label>
@@ -220,7 +308,9 @@ export const FavoriteTaskModal: React.FC<FavoriteTaskModalProps> = ({
                                             onChange={() => toggleFavoriteCheck(task)}
                                         />
                                         <div className="list-text">
-                                            <div className="category-name">業務改善</div>
+                                            <div className="category-name">
+                                                {selectedCategory || '業務改善'}
+                                            </div>
                                             <div className="task-name">{task}</div>
                                         </div>
                                         <button
